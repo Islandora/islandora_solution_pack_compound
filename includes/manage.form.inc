@@ -1,10 +1,23 @@
 <?php
 
+/**
+ * @file
+ * includes/manage.form.inc
+ *
+ * Compound object management callback and form.
+ */
+
+/**
+ * Menu callback for manage form.
+ */
 function islandora_compound_object_manage(FedoraObject $object) {
   return drupal_get_form('islandora_compound_object_manage_form', $object);
 }
 
-function islandora_compound_object_manage_form($form, $form_state, $object) {
+/**
+ * Compound management form.
+ */
+function islandora_compound_object_manage_form($form, &$form_state, $object) {
   $form = array();
   $rels_predicate = variable_get('islandora_compound_object_relationship', 'isPartOf');
 
@@ -29,7 +42,7 @@ function islandora_compound_object_manage_form($form, $form_state, $object) {
         '#title' => t('Remove Child Objects'),
         '#description' => t('Remove child objects of as part of this compound object'),
       );
-      
+
       $header = array('title' => t('Title'), 'pid' => t('Object ID'));
       $form['children']['remove_children'] = array(
         '#type' => 'tableselect',
@@ -90,6 +103,9 @@ function islandora_compound_object_manage_form($form, $form_state, $object) {
   return $form;
 }
 
+/**
+ * Compound object management validation.
+ */
 function islandora_compound_object_manage_form_validate($form, &$form_state) {
   module_load_include('inc', 'islandora', 'includes/utilities');
   $object = $form_state['values']['object'];
@@ -145,6 +161,9 @@ function islandora_compound_object_manage_form_validate($form, &$form_state) {
 
 }
 
+/**
+ * Compound object management submit.
+ */
 function islandora_compound_object_manage_form_submit($form, &$form_state) {
   $object = $form_state['values']['object'];
   $create_thumbs = variable_get('islandora_compound_object_thumbnail_child', TRUE);
@@ -168,7 +187,7 @@ function islandora_compound_object_manage_form_submit($form, &$form_state) {
       islandora_compound_object_update_parent_thumbnail($object, islandora_object_load($form_state['values']['parent']));
     }
   }
-  
+
   // Remove children
   // @TODO: batch
   if (!empty($form_state['values']['remove_children'])) {

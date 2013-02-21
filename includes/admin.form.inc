@@ -1,6 +1,16 @@
 <?php
 
-function islandora_compound_object_admin_form($form, $form_state) {
+/**
+ * @file
+ * includes/admin.form.inc
+ *
+ * Module admin form.
+ */
+
+/**
+ * Module admin form.
+ */
+function islandora_compound_object_admin_form($form, &$form_state) {
   $form = array();
 
   $form['islandora_compound_object_compound_children'] = array(
