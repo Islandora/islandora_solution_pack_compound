@@ -205,7 +205,7 @@ function islandora_compound_object_navigation_block() {
 
         // Check if perms to show link for parent manage
         if (islandora_object_manage_access_callback(array(
-          FEDORA_MANAGE_DATASTREAMS, FEDORA_MANAGE_PROPERTIES, FEDORA_ADD_DS), $parent)) {
+          FEDORA_METADATA_EDIT, FEDORA_MANAGE_PROPERTIES, FEDORA_ADD_DS), $parent)) {
           $parent_url = 'islandora/object/' . $parent_pid . '/manage';
         }
         else {
@@ -241,8 +241,11 @@ function islandora_compound_object_islandora_compoundCModel_islandora_view_objec
   // Get view of first child
   $children = islandora_compound_object_get_parts($object->id);
   if (!empty($children)) {
-    $first_child = islandora_object_load($children[0]);
-    return islandora_view_object($first_child);
+    $first_child_id = reset($children);
+    if ($first_child_id != $object->id) {
+      $first_child = islandora_object_load($first_child_id);
+      return islandora_view_object($first_child);
+    }
   }
 }
 
@@ -316,7 +319,7 @@ function islandora_compound_object_get_parts($pid, $ret_title = FALSE) {
 
   if ($connection) {
     $query = 'select $object $title from <#ri>
-              where $object <dc:title> $title 
+              where $object <dc:title> $title
               and $object <info:fedora/fedora-system:def/relations-external#' . $rels_predicate . '> <info:fedora/' . $pid . '>
               order by $object';
     $results = $connection->repository->ri->itqlQuery($query);
