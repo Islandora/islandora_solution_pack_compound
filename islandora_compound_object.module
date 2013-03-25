@@ -186,51 +186,51 @@ function islandora_compound_object_navigation_block() {
     $object = islandora_object_load($pid);
 
     $output = '';
+    if ($object) {
+      $rels_predicate = variable_get('islandora_compound_object_relationship', 'isPartOf');
+      $part_of = $object->relationships->get('info:fedora/fedora-system:def/relations-external#', $rels_predicate);
 
-    $rels_predicate = variable_get('islandora_compound_object_relationship', 'isPartOf');
-    $part_of = $object->relationships->get('info:fedora/fedora-system:def/relations-external#', $rels_predicate);
+      // This object is part of a compound object
+      if (!empty($part_of)) {
+        // Go through all parents
+        foreach ($part_of AS $part) {
+          $parent_pid = $part['object']['value'];
+          $parent = islandora_object_load($parent_pid);
 
-    // This object is part of a compound object
-    if (!empty($part_of)) {
-      // Go through all parents
-      foreach ($part_of AS $part) {
-        $parent_pid = $part['object']['value'];
-        $parent = islandora_object_load($parent_pid);
+          $siblings = islandora_compound_object_get_parts($parent_pid);
+          $current_key = array_search($object->id, $siblings);
 
-        $siblings = islandora_compound_object_get_parts($parent_pid);
-        $current_key = array_search($object->id, $siblings);
+          $previous_pid = (isset($siblings[$current_key - 1])) ? $siblings[$current_key - 1] : '';
+          $next_pid = (isset($siblings[$current_key + 1])) ? $siblings[$current_key + 1] : '';
 
-        $previous_pid = (isset($siblings[$current_key - 1])) ? $siblings[$current_key - 1] : '';
-        $next_pid = (isset($siblings[$current_key + 1])) ? $siblings[$current_key + 1] : '';
+          // Check if perms to show link for parent manage
+          if (islandora_object_manage_access_callback(array(
+            FEDORA_METADATA_EDIT, FEDORA_MANAGE_PROPERTIES, FEDORA_ADD_DS), $parent)) {
+            $parent_url = 'islandora/object/' . $parent_pid . '/manage';
+          }
+          else {
+            $parent_url = FALSE;
+          }
 
-        // Check if perms to show link for parent manage
-        if (islandora_object_manage_access_callback(array(
-          FEDORA_METADATA_EDIT, FEDORA_MANAGE_PROPERTIES, FEDORA_ADD_DS), $parent)) {
-          $parent_url = 'islandora/object/' . $parent_pid . '/manage';
+          $prev_next = theme('islandora_compound_prev_next',
+            array(
+              'parent_label' => $parent->label,
+              'parent_url' => $parent_url,
+              'previous_pid' => $previous_pid,
+              'next_pid' => $next_pid,
+              'child_count' => count($siblings),
+              'siblings' => $siblings,
+              'pid' => $pid,
+            ));
+
+          $output .= $prev_next;
         }
-        else {
-          $parent_url = FALSE;
-        }
+      }
 
-        $prev_next = theme('islandora_compound_prev_next',
-          array(
-            'parent_label' => $parent->label,
-            'parent_url' => $parent_url,
-            'previous_pid' => $previous_pid,
-            'next_pid' => $next_pid,
-            'child_count' => count($siblings),
-            'siblings' => $siblings,
-            'pid' => $pid,
-          ));
-
-        $output .= $prev_next;
+      if (!empty($output)) {
+        return array('#markup' => $output);
       }
     }
-
-    if (!empty($output)) {
-      return array('#markup' => $output);
-    }
-
   }
 }
 
@@ -318,11 +318,16 @@ function islandora_compound_object_get_parts($pid, $ret_title = FALSE) {
   $connection = islandora_get_tuque_connection();
 
   if ($connection) {
-    $query = 'select $object $title from <#ri>
-              where $object <dc:title> $title
-              and $object <info:fedora/fedora-system:def/relations-external#' . $rels_predicate . '> <info:fedora/' . $pid . '>
-              order by $object';
-    $results = $connection->repository->ri->itqlQuery($query);
+    $query = <<<EOQ
+SELECT ?object ?title
+FROM <#ri>
+WHERE {
+  ?object <fedora-model:label> ?title ;
+          <fedora-rels-ext:$rels_predicate> <info:fedora/$pid> .
+}
+ORDER BY ?object
+EOQ;
+    $results = $connection->repository->ri->sparqlQuery($query);
 
     foreach ($results AS $result) {
       if ($ret_title) {
