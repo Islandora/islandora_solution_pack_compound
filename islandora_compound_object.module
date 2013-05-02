@@ -252,7 +252,7 @@ function islandora_compound_object_islandora_compoundCModel_islandora_view_objec
 /**
  * Access callback for compound object management.
  */
-function islandora_compound_object_access(FedoraObject $object) {
+function islandora_compound_object_access(AbstractObject $object) {
   if (!isset($object)) {
     return FALSE;
   }

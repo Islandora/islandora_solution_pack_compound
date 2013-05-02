@@ -10,7 +10,7 @@
 /**
  * Menu callback for manage form.
  */
-function islandora_compound_object_manage(FedoraObject $object) {
+function islandora_compound_object_manage(AbstractObject $object) {
   return drupal_get_form('islandora_compound_object_manage_form', $object);
 }
 
