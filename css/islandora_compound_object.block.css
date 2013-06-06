@@ -1,18 +1,18 @@
 .islandora-compound-title {
-    font-weight: bold;
+  font-weight: bold;
 }
 
 .islandora-compound-prev-next {
-    border-bottom: 1px solid #b3b3b3;
-    margin-bottom: 15px;
+  border-bottom: 1px solid #b3b3b3;
+  margin-bottom: 15px;
 }
 
 .islandora-compound-thumbs {
-    display: block;
-    white-space: nowrap;
-    overflow-x: auto;
+  display: block;
+  white-space: nowrap;
+  overflow-x: auto;
 }
 
 .islandora-compound-thumbs img {
-    margin: 5px 5px 5px 5px;
+  margin: 5px 5px 5px 5px;
 }

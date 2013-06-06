@@ -70,6 +70,10 @@ function islandora_compound_object_theme($existing, $type, $theme, $path) {
         'pid' => NULL,
       ),
     ),
+    'islandora_compound_object_draggable_table' => array(
+      'render element' => 'form',
+      'file' => 'theme/theme.inc',
+    ),
   );
 }
 
@@ -80,7 +84,7 @@ function islandora_compound_object_block_info() {
   $blocks['compound_navigation'] = array(
     'info' => t('Islandora Compound Object Navigation'),
     'visibility' => BLOCK_VISIBILITY_LISTED,
-    'pages' => 'islandora/object/*'
+    'pages' => 'islandora/object/*',
   );
   return $blocks;
 }
@@ -180,7 +184,7 @@ function islandora_compound_object_navigation_block() {
   drupal_add_css(drupal_get_path('module', 'islandora_compound_object') . '/css/islandora_compound_object.block.css');
   if (arg(1) == 'object' && islandora_is_valid_pid(arg(2))) {
 
-    // If only compound cmodel objects can be compound, this isn't necessary
+    // If only compound cmodel objects can be compound, this isn't necessary.
     $children = islandora_compound_object_get_parts(arg(2));
     $pid = (!empty($children)) ? $children[0] : arg(2);
     $object = islandora_object_load($pid);
@@ -190,10 +194,10 @@ function islandora_compound_object_navigation_block() {
       $rels_predicate = variable_get('islandora_compound_object_relationship', 'isPartOf');
       $part_of = $object->relationships->get('info:fedora/fedora-system:def/relations-external#', $rels_predicate);
 
-      // This object is part of a compound object
+      // This object is part of a compound object.
       if (!empty($part_of)) {
-        // Go through all parents
-        foreach ($part_of AS $part) {
+        // Go through all parents.
+        foreach ($part_of as $part) {
           $parent_pid = $part['object']['value'];
           $parent = islandora_object_load($parent_pid);
 
@@ -203,7 +207,7 @@ function islandora_compound_object_navigation_block() {
           $previous_pid = (isset($siblings[$current_key - 1])) ? $siblings[$current_key - 1] : '';
           $next_pid = (isset($siblings[$current_key + 1])) ? $siblings[$current_key + 1] : '';
 
-          // Check if perms to show link for parent manage
+          // Check if perms to show link for parent manage.
           if (islandora_object_manage_access_callback(array(
             FEDORA_METADATA_EDIT, FEDORA_MANAGE_PROPERTIES, FEDORA_ADD_DS), $parent)) {
             $parent_url = 'islandora/object/' . $parent_pid . '/manage';
@@ -238,7 +242,7 @@ function islandora_compound_object_navigation_block() {
  * Implements hook_islandora_cmodel_islandora_view_object().
  */
 function islandora_compound_object_islandora_compoundCModel_islandora_view_object($object) {
-  // Get view of first child
+  // Get view of first child.
   $children = islandora_compound_object_get_parts($object->id);
   if (!empty($children)) {
     $first_child_id = reset($children);
@@ -295,8 +299,8 @@ function islandora_compound_object_autocomplete_child($string) {
   $islandora_tuque = new IslandoraTuque();
   $results = $islandora_tuque->api->a->findObjects('terms', '*' . $string . '*', 10);
 
-  foreach ($results['results'] AS $result) {
-    // Empty array elements getting sent through
+  foreach ($results['results'] as $result) {
+    // Empty array elements getting sent through.
     if (is_array($result['title'])) {
       $title = $result['title'][0];
     }
@@ -316,27 +320,50 @@ function islandora_compound_object_get_parts($pid, $ret_title = FALSE) {
   $objects = array();
 
   $connection = islandora_get_tuque_connection();
-
+  $escaped_pid = str_replace(':', '_', $pid);
   if ($connection) {
     $query = <<<EOQ
-SELECT ?object ?title
+PREFIX islandora-rels-ext: <http://islandora.ca/ontology/relsext#>
+SELECT ?object ?title ?seq
 FROM <#ri>
 WHERE {
   ?object <fedora-model:label> ?title ;
           <fedora-rels-ext:$rels_predicate> <info:fedora/$pid> .
+  OPTIONAL {
+    ?object islandora-rels-ext:isSequenceNumberOf$escaped_pid ?seq
+  }
 }
-ORDER BY ?object
 EOQ;
     $results = $connection->repository->ri->sparqlQuery($query);
-
-    foreach ($results AS $result) {
+    // Sort the objects into their proper order.
+    $sort = function($a, $b) {
+      $a = $a['seq']['value'];
+      $b = $b['seq']['value'];
+      if ($a === $b) {
+        return 0;
+      }
+      if (empty($a)) {
+        return 1;
+      }
+      if (empty($b)) {
+        return -1;
+      }
+      return $a - $b;
+    };
+    uasort($results, $sort);
+    foreach ($results as $result) {
       if ($ret_title) {
-        $objects[$result['object']['value']] = array('pid' => $result['object']['value'], 'title' => $result['title']['value']);
+        $objects[$result['object']['value']] = array(
+          'pid' => $result['object']['value'],
+          'title' => $result['title']['value'],
+          'seq' => $result['seq']['value'],
+        );
       }
       else {
         $objects[] = $result['object']['value'];
       }
     }
   }
+
   return $objects;
 }
