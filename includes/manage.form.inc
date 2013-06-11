@@ -88,7 +88,7 @@ function islandora_compound_object_manage_form($form, &$form_state, $object) {
     $parents = array();
     foreach ($parent_part_of as $parent) {
       // Shouldn't be too much of a hit but would be good to avoid the
-      // object_loads.
+      // islandora_object_loads.
       $pid = $parent['object']['value'];
       $parent_object = islandora_object_load($pid);
       $parents[$pid] = array('title' => $parent_object->label, 'pid' => $pid);
@@ -207,7 +207,7 @@ function islandora_compound_object_manage_form_submit($form, &$form_state) {
   }
 
   // Remove children.
-  // @TODO: batch.
+  // @todo Batch.
   if (!empty($form_state['values']['remove_children'])) {
     foreach ($form_state['values']['remove_children'] as $child) {
       if ($child) {
@@ -231,7 +231,7 @@ function islandora_compound_object_manage_form_submit($form, &$form_state) {
     }
   }
 
-  // @TODO: actually confirm
+  // @TODO: Actually confirm.
   drupal_set_message(t('Compound relationships modified.'));
 }
 

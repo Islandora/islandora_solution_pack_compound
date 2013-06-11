@@ -256,11 +256,8 @@ function islandora_compound_object_islandora_compoundCModel_islandora_view_objec
 /**
  * Access callback for compound object management.
  */
-function islandora_compound_object_access(FedoraObject $object) {
-  if (!isset($object)) {
-    return FALSE;
-  }
-  return user_access('administer compound relationships');
+function islandora_compound_object_access(AbstractObject $object) {
+  return islandora_object_access('administer compound relationships', $object);
 }
 
 /**
@@ -335,6 +332,7 @@ WHERE {
 }
 EOQ;
     $results = $connection->repository->ri->sparqlQuery($query);
+
     // Sort the objects into their proper order.
     $sort = function($a, $b) {
       $a = $a['seq']['value'];
@@ -351,6 +349,7 @@ EOQ;
       return $a - $b;
     };
     uasort($results, $sort);
+
     foreach ($results as $result) {
       if ($ret_title) {
         $objects[$result['object']['value']] = array(
