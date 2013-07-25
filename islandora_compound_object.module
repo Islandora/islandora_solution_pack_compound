@@ -351,15 +351,18 @@ EOQ;
     uasort($results, $sort);
 
     foreach ($results as $result) {
-      if ($ret_title) {
-        $objects[$result['object']['value']] = array(
-          'pid' => $result['object']['value'],
-          'title' => $result['title']['value'],
-          'seq' => $result['seq']['value'],
-        );
-      }
-      else {
-        $objects[] = $result['object']['value'];
+      $object = islandora_object_load($result['object']['value']);
+      if (islandora_object_access(FEDORA_VIEW_OBJECTS, $object)) {
+        if ($ret_title) {
+          $objects[$result['object']['value']] = array(
+            'pid' => $result['object']['value'],
+            'title' => $result['title']['value'],
+            'seq' => $result['seq']['value'],
+          );
+        }
+        else {
+          $objects[] = $result['object']['value'];
+        }
       }
     }
   }
