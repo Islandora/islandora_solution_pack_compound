@@ -209,7 +209,7 @@ function islandora_compound_object_navigation_block() {
 
           // Check if perms to show link for parent manage.
           if (islandora_object_manage_access_callback(array(
-            FEDORA_METADATA_EDIT, FEDORA_MANAGE_PROPERTIES, FEDORA_ADD_DS), $parent)) {
+            ISLANDORA_METADATA_EDIT, ISLANDORA_MANAGE_PROPERTIES, ISLANDORA_ADD_DS), $parent)) {
             $parent_url = 'islandora/object/' . $parent_pid . '/manage';
           }
           else {
@@ -352,7 +352,7 @@ EOQ;
 
     foreach ($results as $result) {
       $object = islandora_object_load($result['object']['value']);
-      if (islandora_object_access(FEDORA_VIEW_OBJECTS, $object)) {
+      if (islandora_object_access(ISLANDORA_VIEW_OBJECTS, $object)) {
         if ($ret_title) {
           $objects[$result['object']['value']] = array(
             'pid' => $result['object']['value'],

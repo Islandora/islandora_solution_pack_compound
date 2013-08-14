@@ -41,7 +41,7 @@ function theme_islandora_compound_prev_next($variables) {
         $active = array();
       }
       $sibling_object = islandora_object_load($sibling);
-      if (isset($sibling_object['TN']) && islandora_datastream_access(FEDORA_VIEW_OBJECTS, $sibling_object['TN'])) {
+      if (isset($sibling_object['TN']) && islandora_datastream_access(ISLANDORA_VIEW_OBJECTS, $sibling_object['TN'])) {
         $path = 'islandora/object/' . $sibling . '/datastream/TN/view';
       }
       else {
