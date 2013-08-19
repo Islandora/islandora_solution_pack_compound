@@ -4,7 +4,7 @@ php:
   - 5.4
 branches:
   only:
-    - 7.x
+    - /^7.x/
 env:
   - FEDORA_VERSION="3.5"
   - FEDORA_VERSION="3.6.2"
@@ -15,10 +15,10 @@ before_install:
   - $HOME/islandora/tests/scripts/travis_setup.sh
   - cd $HOME/drupal-*
   - ln -s $TRAVIS_BUILD_DIR sites/all/modules/islandora_solution_pack_compound
-  - drush en --user=1 --yes islandora_compound
+  - drush en --user=1 --yes islandora_compound_object
 script:
-  - ant -buildfile sites/all/modules/islandora_solution_pack_compound/build.xml lint
+#  - ant -buildfile sites/all/modules/islandora_solution_pack_compound/build.xml lint
   - $ISLANDORA_DIR/tests/scripts/line_endings.sh sites/all/modules/islandora_solution_pack_compound
-  - drush coder-review --reviews=production,security,style,i18n,potx,sniffer islandora_compound
+  - drush coder-review --reviews=production,security,style,i18n,potx,sniffer islandora_compound_object
   - phpcpd --names *.module,*.inc,*.test sites/all/modules/islandora_solution_pack_compound
   - drush test-run --uri=http://localhost:8081 "Islandora Solution Pack Compound"
