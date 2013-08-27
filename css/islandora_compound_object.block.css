@@ -27,6 +27,6 @@
   float: left;
 }
 
-.islandora-compound-thumbs .active img {
+.islandora-compound-thumbs img.active{
   border:0.3em solid;
 }

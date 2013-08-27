@@ -35,7 +35,7 @@ function theme_islandora_compound_prev_next($variables) {
     for ($i = 0; $i < count($variables['siblings']); $i++) {
       $output .= '<div class="islandora-compound-thumb">';
       $sibling = $variables['siblings'][$i];
-      if (arg(2) != $sibling && arg(2) != $variables['pid']) {
+      if ($sibling === $variables['pid']) {
         $active = array('class' => 'active');
       }
       else {
@@ -58,11 +58,11 @@ function theme_islandora_compound_prev_next($variables) {
         theme_image(
           array(
             'path' => $path,
-            'attributes' => array(),
+            'attributes' => array('class' => $active),
           )
         ),
         'islandora/object/' . $sibling,
-        array('attributes' => $active, 'html' => TRUE)
+        array('html' => TRUE)
       );
 
       $output .= '</div>';
