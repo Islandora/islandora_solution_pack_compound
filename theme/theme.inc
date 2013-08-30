@@ -11,6 +11,8 @@
  * Theme function for the compound navigation block parts.
  */
 function theme_islandora_compound_prev_next($variables) {
+  drupal_add_js(drupal_get_path('module', 'islandora_compound_object') . '/js/caption_width.js');
+
   $output = '<div class="islandora-compound-prev-next">';
   $output .= '<span class="islandora-compound-title">' . t('Part of: @parent (@count objects)',
     array('@parent' => $variables['parent_label'], '@count' => $variables['child_count']));
