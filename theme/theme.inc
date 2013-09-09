@@ -10,7 +10,7 @@
 /**
  * Theme function for the compound navigation block parts.
  */
-function theme_islandora_compound_prev_next($variables) {
+function islandora_compound_object_preprocess_islandora_compound_object_prev_next($variables) {
   drupal_add_js(drupal_get_path('module', 'islandora_compound_object') . '/js/caption_width.js');
 
   $output = '<div class="islandora-compound-prev-next">';
