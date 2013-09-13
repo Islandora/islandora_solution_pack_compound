@@ -20,7 +20,7 @@ function islandora_compound_object_manage(FedoraObject $object) {
 function islandora_compound_object_manage_form($form, &$form_state, $object) {
   $form = array();
   $form_state['object'] = $object;
-  $rels_predicate = variable_get('islandora_compound_object_relationship', 'isPartOf');
+  $rels_predicate = variable_get('islandora_compound_object_relationship', 'isConstituentOf');
 
   // Add child objects.
   if (variable_get('islandora_compound_object_compound_children', TRUE) && in_array(ISLANDORA_COMPOUND_OBJECT_CMODEL, $object->models)) {
@@ -121,7 +121,7 @@ function islandora_compound_object_manage_form($form, &$form_state, $object) {
 function islandora_compound_object_manage_form_validate($form, &$form_state) {
   module_load_include('inc', 'islandora', 'includes/utilities');
   $object = $form_state['values']['object'];
-  $rels_predicate = variable_get('islandora_compound_object_relationship', 'isPartOf');
+  $rels_predicate = variable_get('islandora_compound_object_relationship', 'isConstituentOf');
 
   // Child.
   if (!empty($form_state['values']['child'])) {
@@ -179,8 +179,7 @@ function islandora_compound_object_manage_form_validate($form, &$form_state) {
 function islandora_compound_object_manage_form_submit($form, &$form_state) {
   $object = $form_state['values']['object'];
   $create_thumbs = variable_get('islandora_compound_object_thumbnail_child', TRUE);
-  $rels_predicate = variable_get('islandora_compound_object_relationship', 'isPartOf');
-
+  $rels_predicate = variable_get('islandora_compound_object_relationship', 'isConstituentOf');
   // Relationship from child to this object.
   if (!empty($form_state['values']['child'])) {
     $escaped_pid = str_replace(':', '_', $object->id);

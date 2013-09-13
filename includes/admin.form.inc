@@ -31,7 +31,7 @@ function islandora_compound_object_admin_form($form, &$form_state) {
     '#type' => 'textfield',
     '#title' => t('Child relationship predicate'),
     '#description' => t('Changing this after objects have been created will break functionality. Should be part of info:fedora/fedora-system:def/relations-external#'),
-    '#default_value' => variable_get('islandora_compound_object_relationship', 'isPartOf'),
+    '#default_value' => variable_get('islandora_compound_object_relationship', 'isConstituentOf'),
     '#required' => TRUE,
   );
 
