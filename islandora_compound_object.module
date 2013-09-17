@@ -337,6 +337,21 @@ function islandora_compound_object_islandora_basic_collection_get_query_filters(
 }
 
 /**
+ * Implements hook_islandora_solr_results_alter().
+ */
+function islandora_compound_object_islandora_solr_results_alter(&$search_results, $query_processor) {
+  // Remove any search results that's object has an
+  // islandora_compound_object_relationship entry in the rels.
+  $count = 0;
+  foreach ($search_results as $result) {
+    $rels_predicate = variable_get('islandora_compound_object_relationship', 'isConstituentOf');
+    if (isset($result['solr_doc']['RELS_EXT_' . $rels_predicate . '_uri_ms'])) {
+      unset($search_results[$count]);
+    }
+    $count++;
+  }
+}
+/**
  * Return an array of pids that are part of a compound object.
  */
 function islandora_compound_object_get_parts($pid, $ret_title = FALSE) {
