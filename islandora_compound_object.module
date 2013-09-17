@@ -337,6 +337,16 @@ function islandora_compound_object_islandora_basic_collection_get_query_filters(
 }
 
 /**
+ * Implements hook_islandora_solr_query().
+ */
+function islandora_compound_object_islandora_solr_query($islandora_solr_query) {
+  $fq = variable_get('islandora_compound_object_solr_fq', '-RELS_EXT_isConstituentOf_uri_mt:*');
+  if (!empty($fq)) {
+    $islandora_solr_query->solrParams['fq'][] = $fq;
+  }
+}
+
+/**
  * Return an array of pids that are part of a compound object.
  */
 function islandora_compound_object_get_parts($pid, $ret_title = FALSE) {
