@@ -43,8 +43,8 @@
      } else {
        // Object either does not have a thumbnail or it's restricted show a
        // default in its place.
-       $image_path = drupal_get_path('module', 'islandora');
-       $path = "$image_path/images/folder.png";
+       
+       $path = $folder_image_path;
      }?>
 
      <span class='islandora-compound-caption'><?php print $sibling_object->label;?></span>
