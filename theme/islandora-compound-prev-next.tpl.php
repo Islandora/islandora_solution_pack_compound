@@ -5,9 +5,15 @@
  * islandora-compound-object-prev-next.tpl.php
  *
  * @TODO: needs documentation about file and variables
+ * $parent_label - Title of compound object
+ * $child_count - Count of objects in compound object
+ * $parent_url - URL to manage compound object
+ * $previous_pid - PID of previous object in sequence or blank if on first
+ * $next_pid - PID of next object in sequence or blank if on last
+ * $siblings - array of PIDs of sibling objects in compound 
+ * $folder_image_path - path to default folder image for missing/restricted thumbnails
  */
  
- drupal_add_js(drupal_get_path('module', 'islandora_compound_object') . '/js/caption_width.js');
 ?>
  <div class="islandora-compound-prev-next">
  <span class="islandora-compound-title"><?php 
@@ -62,6 +68,6 @@
 
      </div>
    <?php endfor; // 0 -> count($siblings) ?>
-   </div>
+   </div> <!-- /islandora-compound-thumbs -->
  <?php endif; // $child_count > 1 ?>
  </div>
