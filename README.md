@@ -45,3 +45,9 @@ CUSTOMIZATION
 
 The "Islandora Compound Object Navigation" block can be themed. See theme_islandora_compound_prev_next().
 
+DRUSH
+-------------
+
+A Drush command has been added, to be run from the command line (Terminal), that will update the existing rel-predicate of
+existing compound objects to 'isConstituentOf'. It can be run with the drush command 'drush update_rels_predicate'. This command 
+accpets no arguments.
