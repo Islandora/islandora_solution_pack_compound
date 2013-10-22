@@ -12,11 +12,8 @@
  */
 function islandora_compound_object_preprocess_islandora_compound_object_prev_next(&$variables) {
   drupal_add_js(drupal_get_path('module', 'islandora_compound_object') . '/js/caption_width.js');
-
   $image_path = drupal_get_path('module', 'islandora');
   $variables['folder_image_path'] = "$image_path/images/folder.png";
-
-
 }
 
 /**
