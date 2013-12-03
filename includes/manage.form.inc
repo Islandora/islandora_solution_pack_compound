@@ -32,7 +32,7 @@ function islandora_compound_object_manage_form($form, &$form_state, $object) {
     $form['add_children']['child'] = array(
       '#type' => 'textfield',
       '#title' => t('Child Object Pid/Label'),
-      '#autocomplete_path' => 'islandora_compound_object/autocomplete',
+      '#autocomplete_path' => 'islandora_compound_object/autocomplete/child',
     );
 
     // Remove children.
@@ -73,7 +73,7 @@ function islandora_compound_object_manage_form($form, &$form_state, $object) {
   $form['add_to_parent']['parent'] = array(
     '#type' => 'textfield',
     '#title' => t('Parent Object Pid/Label'),
-    '#autocomplete_path' => 'islandora_compound_object/autocomplete',
+    '#autocomplete_path' => 'islandora_compound_object/autocomplete/parent',
   );
 
   // Remove parents.
@@ -126,6 +126,15 @@ function islandora_compound_object_manage_form_validate($form, &$form_state) {
   // Child.
   if (!empty($form_state['values']['child'])) {
     // Check if valid child pid.
+    $compound = FALSE;
+    foreach ($object->models as $value) {
+      if ($value == "islandora:compoundCModel") {
+        $compound = TRUE;
+      }
+    }
+    if (!$compound) {
+      form_set_error('child', t('This object is not a compound object'));
+    }
     if (!islandora_is_valid_pid($form_state['values']['child'])) {
       form_set_error('child', t('Invalid object supplied.'));
     }
@@ -151,7 +160,18 @@ function islandora_compound_object_manage_form_validate($form, &$form_state) {
     if (!islandora_is_valid_pid($form_state['values']['parent'])) {
       form_set_error('parent', t('Invalid object supplied.'));
     }
-
+    elseif (variable_get('islandora_compound_object_compound_children', TRUE)) {
+      $parent = islandora_object_load($form_state['values']['parent']);
+      $compound = FALSE;
+      foreach ($parent->models as $value) {
+        if ($value == "islandora:compoundCModel") {
+          $compound = TRUE;
+        }
+      }
+      if (!$compound) {
+        form_set_error('parent', t('The parent object (@pid) is not a compound object!', array('@pid' => $form_state['values']['parent'])));
+      }
+    }
     // Do not allow parent of self.
     if ($form_state['values']['parent'] == $object->id) {
       form_set_error('parent', t('An object may not be the parent of itself.'));
@@ -189,7 +209,7 @@ function islandora_compound_object_manage_form_submit($form, &$form_state) {
     $child_object->relationships->add('info:fedora/fedora-system:def/relations-external#', $rels_predicate, $object->id);
     $child_object->relationships->add(ISLANDORA_RELS_EXT_URI, "isSequenceNumberOf$escaped_pid", $insert_seq, TRUE);
     if ($create_thumbs) {
-      islandora_compound_object_update_parent_thumbnail($child_object, $object);
+      islandora_compound_object_update_parent_thumbnail($object);
     }
   }
 
@@ -201,7 +221,7 @@ function islandora_compound_object_manage_form_submit($form, &$form_state) {
     $object->relationships->add('info:fedora/fedora-system:def/relations-external#', $rels_predicate, $form_state['values']['parent']);
     $object->relationships->add(ISLANDORA_RELS_EXT_URI, "isSequenceNumberOf$escaped_pid", $insert_seq, TRUE);
     if ($create_thumbs) {
-      islandora_compound_object_update_parent_thumbnail($object, islandora_object_load($form_state['values']['parent']));
+      islandora_compound_object_update_parent_thumbnail(islandora_object_load($form_state['values']['parent']));
     }
   }
 
@@ -216,6 +236,9 @@ function islandora_compound_object_manage_form_submit($form, &$form_state) {
         $child_object->relationships->remove(ISLANDORA_RELS_EXT_URI, "isSequenceNumberOf$escaped_pid");
       }
     }
+    if ($create_thumbs) {
+      islandora_compound_object_update_parent_thumbnail($object);
+    }
   }
 
   // Unlink parents.
@@ -226,6 +249,9 @@ function islandora_compound_object_manage_form_submit($form, &$form_state) {
         $parent_object = islandora_object_load($parent);
         $escaped_pid = str_replace(':', '_', $object->id);
         $parent_object->relationships->remove(ISLANDORA_RELS_EXT_URI, "isSequenceNumberOf$escaped_pid");
+        if ($create_thumbs) {
+          islandora_compound_object_update_parent_thumbnail($parent_object);
+        }
       }
     }
   }
@@ -326,6 +352,19 @@ function islandora_compound_object_sequence_batch($pid, array $compounds) {
 }
 
 /**
+ * To change the thumbnail after update sequence.
+ *
+ * @param string $parent
+ *   The parent pid.
+ */
+function islandora_compound_object_change_thumbnail($parent) {
+  $create_thumbs = variable_get('islandora_compound_object_thumbnail_child', TRUE);
+  if ($create_thumbs) {
+    islandora_compound_object_update_parent_thumbnail(islandora_object_load($parent));
+  }
+}
+
+/**
  * Builds up a sequence of operations for sequence numbering.
  *
  * @param string $parent_pid
@@ -349,6 +388,11 @@ function islandora_compound_object_build_sequence_operations($parent_pid, $compo
     );
     $start_seq++;
   }
+  $operations[] = array(
+    'islandora_compound_object_change_thumbnail', array(
+      $parent_pid,
+    ),
+  );
   return $operations;
 }
 
