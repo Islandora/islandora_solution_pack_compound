@@ -120,7 +120,7 @@ function islandora_compound_object_batch_delete_rels_predicate($compound_object,
     $escaped_pid = str_replace(':', '_', $compound_object);
     $child_object = islandora_object_load($part);
     $child_object->relationships->remove('info:fedora/fedora-system:def/relations-external#', 'isPartOf', $compound_object);
-    $child_object->relationships->remove(ISLANDORA_RELS_EXT_URI, "isSequenceNumberOf$escaped_pid");
+    // $child_object->relationships->remove(ISLANDORA_RELS_EXT_URI, "isSequenceNumberOf$escaped_pid");
   }
 }
 
