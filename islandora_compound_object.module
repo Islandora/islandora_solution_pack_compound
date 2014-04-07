@@ -293,7 +293,8 @@ function islandora_compound_object_update_parent_thumbnail($parent) {
     // rather than in memory. Since the colon is forbidden in
     // filenames, replace it with an underscore instead.
     $thumbnail_id = ((islandora_deployed_on_windows()) ? str_replace(':', '_', $child->id) : $child->id);
-    $file = drupal_realpath("temporary://{$thumbnail_id}_TN.{$ext}");
+    $file_name = "{$thumbnail_id}_TN.{$ext}";
+    $file = drupal_realpath("temporary://$file_name");
     $child['TN']->getContent($file);
     if (empty($parent['TN'])) {
       $ds = $parent->constructDatastream('TN', 'M');
@@ -306,7 +307,7 @@ function islandora_compound_object_update_parent_thumbnail($parent) {
     $ds->label = 'Thumbnail';
     $ds->mimetype = $mime_detector->getMimetype($file);
 
-    file_unmanaged_delete($file);
+    islandora_temp_file_entry($file_name, $file);
   }
   elseif (isset($parent['TN'])) {
     $parent->purgeDatastream('TN');
