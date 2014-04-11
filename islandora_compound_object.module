@@ -295,6 +295,8 @@ function islandora_compound_object_update_parent_thumbnail($parent) {
     $thumbnail_id = ((islandora_deployed_on_windows()) ? str_replace(':', '_', $child->id) : $child->id);
     $file_name = "{$thumbnail_id}_TN.{$ext}";
     $file = drupal_realpath("temporary://$file_name");
+    islandora_temp_file_entry($file_name, "temporary://$file_name");
+
     $child['TN']->getContent($file);
     if (empty($parent['TN'])) {
       $ds = $parent->constructDatastream('TN', 'M');
@@ -306,8 +308,8 @@ function islandora_compound_object_update_parent_thumbnail($parent) {
     $ds->setContentFromFile($file, TRUE);
     $ds->label = 'Thumbnail';
     $ds->mimetype = $mime_detector->getMimetype($file);
+    islandora_temp_file_delete("temporary://$file_name");
 
-    islandora_temp_file_entry($file_name, $file);
   }
   elseif (isset($parent['TN'])) {
     $parent->purgeDatastream('TN');
