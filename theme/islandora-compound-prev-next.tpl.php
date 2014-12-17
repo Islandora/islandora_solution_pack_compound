@@ -11,6 +11,7 @@
  * $previous_pid - PID of previous object in sequence or blank if on first
  * $next_pid - PID of next object in sequence or blank if on last
  * $siblings - array of PIDs of sibling objects in compound 
+ * $single_child_url - link to access object, if there is only one child
  * $themed_siblings - array of siblings of model
  *    array(
  *      'pid' => PID of sibling,
@@ -24,11 +25,15 @@
  <div class="islandora-compound-prev-next">
  <span class="islandora-compound-title"><?php 
   print t('Part of: @parent (@count objects)', array('@parent' => $parent_label, '@count' => $child_count)); ?>
- <?php if ($parent_url): ?>
+ <?php if ($parent_url && $parent_pid != $pid): ?>
     <?php print l(t('manage parent'), $parent_url); ?>
  <?php endif; ?>
- </span><br/>
-
+ <br/>
+ <?php if ($single_child_url && $parent_pid == $pid): ?>
+    <?php print l(t('Link to only child object'), $single_child_url); ?><br />
+ <?php endif; ?>
+ </span>
+fix
  <?php if (!empty($previous_pid)): ?>
    <?php print l(t('Previous'), 'islandora/object/' . $previous_pid); ?>
  <?php endif; ?>
