@@ -25,11 +25,11 @@
  <div class="islandora-compound-prev-next">
  <span class="islandora-compound-title"><?php 
   print t('Part of: @parent (@count objects)', array('@parent' => $parent_label, '@count' => $child_count)); ?>
- <?php if ($parent_url && $parent_pid != $pid): ?>
+ <?php if ($parent_url && $parent_pid != $current_pid): ?>
     <?php print l(t('manage parent'), $parent_url); ?>
  <?php endif; ?>
  <br/>
- <?php if ($single_child_url && $parent_pid == $pid): ?>
+ <?php if ($single_child_url && $parent_pid == $current_pid): ?>
     <?php print l(t('Link to only child object'), $single_child_url); ?><br />
  <?php endif; ?>
  </span>
