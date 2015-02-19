@@ -17,7 +17,7 @@ function template_preprocess_islandora_compound_prev_next(array &$variables) {
   $single_child_url = FALSE;
   $image_path = drupal_get_path('module', 'islandora');
   $folder_image_path = "$image_path/images/folder.png";
-  if ($variables['child_count'] > 1) {
+  if ($variables['child_count'] > 0) {
     for ($i = 0; $i < count($variables['siblings']); $i += 1) {
       $sibling = array();
       $sibling['pid'] = $variables['siblings'][$i];
@@ -38,12 +38,8 @@ function template_preprocess_islandora_compound_prev_next(array &$variables) {
       $themed_siblings[] = $sibling;
     }
   }
-  else if ($variables['child_count'] == 1) {
-    $child_pid = $variables['siblings'][0];
-    $single_child_url = 'islandora/object/' . $child_pid;
-  }
-  $variables['single_child_url'] = $single_child_url;
   $variables['themed_siblings'] = $themed_siblings;
+  $variables['is_parent'] = ($variables['current_pid'] == $variables['parent_pid']);
 }
 
 
