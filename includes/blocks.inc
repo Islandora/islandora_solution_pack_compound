@@ -63,7 +63,7 @@ function islandora_compound_object_jail_display_block() {
         $block['siblings'] = array(
           '#type' => 'container',
           '#attributes' => array('class' => array('islandora-compound-thumbs')),
-        )
+        );
         foreach ($compound_info['siblings'] as $sibling) {
           $sibling_object = islandora_object_load($sibling);
           if (isset($sibling_object['TN']) && islandora_datastream_access(ISLANDORA_VIEW_OBJECTS, $sibling_object['TN'])) {
