@@ -41,6 +41,8 @@ function islandora_compound_object_jail_display_block() {
       if (!$is_parent) {
         $block['part_title'] = array(
           '#type' => 'item',
+          '#prefix' => '<span class="islandora-compound-jail-title">',
+          '#suffix' => '</span>',
           '#markup' => t('Part of: <a href="@url">@label</a> (@count @obj)', array(
             '@url' => url('islandora/object/' . $compound_info['parent_pid']),
             '@label' => $compound_info['parent_label'],
@@ -52,10 +54,16 @@ function islandora_compound_object_jail_display_block() {
       if (!$is_parent && $compound_info['parent_url']) {
         $block['manage_link'] = array(
           '#type' => 'item',
+          '#prefix' => '<span class="islandora-compound-jail-manage">',
+          '#suffix' => '</span>',
           '#markup' => l(t('manage parent'), $compound_info['parent_url']),
         );
       }
       if ($is_parent || count($compound_info['siblings']) > 1) {
+        $block['siblings'] = array(
+          '#type' => 'container',
+          '#attributes' => array('class' => array('islandora-compound-thumbs')),
+        )
         foreach ($compound_info['siblings'] as $sibling) {
           $sibling_object = islandora_object_load($sibling);
           if (isset($sibling_object['TN']) && islandora_datastream_access(ISLANDORA_VIEW_OBJECTS, $sibling_object['TN'])) {
@@ -90,13 +98,14 @@ function islandora_compound_object_jail_display_block() {
               '#suffix' => '</noscript>',
             ),
           );
-          $block[$sibling] = array(
+          $block['siblings'][$sibling] = array(
             '#type' => 'container',
-            '#attributes' => array(),
+            '#attributes' => array('class' => array('islandora-compound-thumb')),
             'link' => array(
               '#type' => 'link',
               '#title' => t("@title", array("@title" => $sibling_object->label)),
               '#href' => "islandora/object/$sibling",
+              '#options' => array('attributes' => array('class' => array('islandora-compound-caption'))),
             ),
             'content' => array(
               '#theme' => 'link',
