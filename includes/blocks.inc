@@ -103,9 +103,10 @@ function islandora_compound_object_jail_display_block() {
             '#attributes' => array('class' => array('islandora-compound-thumb')),
             'link' => array(
               '#type' => 'link',
+              '#prefix' => '<span class="islandora-compound-caption">',
+              '#suffix' => '</span>',
               '#title' => t("@title", array("@title" => $sibling_object->label)),
               '#href' => "islandora/object/$sibling",
-              '#options' => array('attributes' => array('class' => array('islandora-compound-caption'))),
             ),
             'content' => array(
               '#theme' => 'link',

@@ -17,6 +17,10 @@
 #block-islandora-compound-object-compound-jail-display a {
   display: block;
 }
+/* To allow the <a> in the Part of: text */
+#block-islandora-compound-object-compound-jail-display .islandora-compound-jail-title a {
+  display: inline;
+}
 #block-islandora-compound-object-compound-jail-display .content a {
     display: inline-block;
     max-width: 20%;
