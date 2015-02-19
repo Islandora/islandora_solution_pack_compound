@@ -14,7 +14,6 @@ function template_preprocess_islandora_compound_prev_next(array &$variables) {
   drupal_add_js(drupal_get_path('module', 'islandora_compound_object') . '/js/caption_width.js');
 
   $themed_siblings = array();
-  $single_child_url = FALSE;
   $image_path = drupal_get_path('module', 'islandora');
   $folder_image_path = "$image_path/images/folder.png";
   if ($variables['child_count'] > 0) {
