@@ -118,9 +118,9 @@ function islandora_compound_object_jail_display_block() {
               ),
             ),
           );
-        } // end foreach
-      } // endif $is_parent || count($siblings) > 1
-    } // endif $compound_info
-  } // endif $object
+        }
+      }
+    }
+  }
   return $block;
 }
