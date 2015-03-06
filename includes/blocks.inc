@@ -39,16 +39,59 @@ function islandora_compound_object_jail_display_block() {
         "$module_path/css/islandora_compound_object.jail_block.css",
       );
       if (!$is_parent) {
-        $block['part_title'] = array(
-          '#type' => 'item',
-          '#prefix' => '<span class="islandora-compound-jail-title">',
-          '#suffix' => '</span>',
-          '#markup' => t('Part of: <a href="@url">@label</a> (@count @obj)', array(
-            '@url' => url('islandora/object/' . $compound_info['parent_pid']),
-            '@label' => $compound_info['parent_label'],
-            '@count' => $compound_info['child_count'],
-            '@obj' => format_plural($compound_info['child_count'], 'object', 'objects'),
-          )),
+        $parent_object = islandora_object_load($compound_info['parent_pid']);
+        if (isset($parent_object['TN']) && islandora_datastream_access(ISLANDORA_VIEW_OBJECTS, $parent_object['TN'])) {
+          $path = 'islandora/object/' . $parent_object->id . '/datastream/TN/view';
+        }
+        else {
+          // Object either does not have a thumbnail or it's restricted show a
+          // default in its place.
+          $image_path = drupal_get_path('module', 'islandora');
+          $path = "$image_path/images/folder.png";
+        }
+        $parent_img = array(
+          'image' => array(
+            '#theme' => 'image',
+            '#path' => "$module_path/images/loader.png",
+            '#attributes' => array(
+              'class' => array(
+                'islandora-compound-object-jail',
+              ),
+              'data-src' => url($path),
+            ),
+            '#href' => "islandora/object/" . $parent_object->id,
+          ),
+          'noscript' => array(
+            '#theme' => 'image',
+            '#path' => $path,
+            '#prefix' => '<noscript>',
+            '#suffix' => '</noscript>',
+          ),
+        );
+        $block['part_tn'] = array(
+          '#type' => 'container',
+          '#attributes' => array('class' => array('islandora-compound-parent-thumb')),
+          'link' => array(
+            '#type' => 'link',
+            '#prefix' => '<span class="islandora-compound-caption">',
+            '#suffix' => '</span>',
+            '#title' => t('Part of: @label (@count @obj)', array(
+                '@label' => $compound_info['parent_label'],
+                '@count' => $compound_info['child_count'],
+                '@obj' => format_plural($compound_info['child_count'], 'object', 'objects'),
+              ),
+            ),
+            '#href' => "islandora/object/" . $parent_object->id,
+          ),
+          'content' => array(
+            '#theme' => 'link',
+            '#text' => drupal_render($parent_img),
+            '#path' => "islandora/object/" . $parent_object->id,
+            '#options' => array(
+              'attributes' => array(),
+              'html' => TRUE,
+            ),
+          ),
         );
       }
       if (!$is_parent && $compound_info['parent_url']) {

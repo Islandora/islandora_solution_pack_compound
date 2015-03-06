@@ -26,12 +26,22 @@
  <div class="islandora-compound-prev-next">
   <?php if (!$is_parent): ?>
    <span class="islandora-compound-title">
- <?php print t('Part of: <a href="@url">@parent</a> (@count objects)', array(
+ <?php print t('Parent: <a href="@url">@parent</a> (@count objects)', array(
    '@parent' => $parent_label,
    '@count' => $child_count,
    '@url' => url('islandora/object/' . $parent_pid),
    )); ?>
    </span>
+   <?php print l(
+    theme_image(
+      array(
+        'path' => $parent['TN'],
+        'attributes' => array('class' => $parent['class']),
+      )
+    ),
+    'islandora/object/' . $parent['pid'],
+    array('html' => TRUE)
+    );?>
  <?php endif; ?>
 
  <?php if (!$is_parent && $parent_url): ?>
