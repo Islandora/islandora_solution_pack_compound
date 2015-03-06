@@ -79,8 +79,7 @@ function islandora_compound_object_jail_display_block() {
                 '@label' => $compound_info['parent_label'],
                 '@count' => $compound_info['child_count'],
                 '@obj' => format_plural($compound_info['child_count'], 'object', 'objects'),
-              ),
-            ),
+              )),
             '#href' => "islandora/object/" . $parent_object->id,
           ),
           'content' => array(
