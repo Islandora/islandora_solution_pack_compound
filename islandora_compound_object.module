@@ -272,6 +272,10 @@ function islandora_compound_object_update_parent_thumbnail($parent) {
   $parts = islandora_compound_object_get_parts($parent->id);
   if (!empty($parts)) {
     $child = islandora_object_load($parts[0]);
+    // Child doesn't have a thumbnail then we can't set the parents TN either.
+    if (empty($child['TN'])) {
+      return;
+    }
     $mime_detector = new MimeDetect();
     $ext = $mime_detector->getExtension($child['TN']->mimeType);
     // Windows will likely store temp data in a temp directory
