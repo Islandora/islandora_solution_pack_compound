@@ -1,7 +1,6 @@
 /* Display in Content Region */
 
-#block-islandora-compound-object-compound-jail-display {
-    height: 100px;
+#block-islandora-compound-object-compound-jail-display .islandora-compound-jail-prev-next {
     height: 200px;
     width: 100%;
     overflow-x: hidden;

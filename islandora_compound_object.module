@@ -103,6 +103,20 @@ function islandora_compound_object_theme($existing, $type, $theme, $path) {
         'pid' => NULL,
       ),
     ),
+    'islandora_compound_jail_prev_next' => array(
+      'file' => 'theme/theme.inc',
+      'template' => 'theme/islandora-compound-jail-prev-next',
+      'pattern' => 'islandora_compound_jail_prev_next__',
+      'variables' => array(
+        'parent_label' => NULL,
+        'parent_url' => NULL,
+        'previous_pid' => NULL,
+        'next_pid' => NULL,
+        'child_count' => NULL,
+        'siblings' => NULL,
+        'pid' => NULL,
+      ),
+    ),
     'islandora_compound_object_draggable_table' => array(
       'render element' => 'form',
       'file' => 'theme/theme.inc',
