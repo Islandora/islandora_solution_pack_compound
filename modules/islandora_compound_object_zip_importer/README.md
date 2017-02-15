@@ -11,7 +11,7 @@ This module requires the following modules/libraries:
 * [Islandora](https://github.com/islandora/islandora)
 * [Tuque](https://github.com/islandora/tuque)
 * [Islandora Basic Collection](https://github.com/Islandora/islandora_solution_pack_collection)
-* [Islandora ZIP Importer](https://github.com/discoverygarden/islandora_importer/tree/7.x/modules/zip_importer)
+* [Islandora ZIP Importer](https://github.com/islandora/islandora_importer/tree/7.x/modules/zip_importer)
 
 ## Installation
 
@@ -28,7 +28,7 @@ Having problems or solved a problem? Check out the Islandora google groups for a
 
 Current maintainers:
 
-* [Jordan Dukart](https://github.com/jordandukart)
+* [Jared Whiklo](https://github.com/whikloj)
 
 ## Development
 
