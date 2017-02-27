@@ -9,8 +9,12 @@ The Islandora Compound Object Solution Pack enables generic parent-child relatio
 This module requires the following modules/libraries:
 
 * [Islandora](https://github.com/islandora/islandora)
+
+This module has the following as optional requirements for certain features:
+
+For Islandora Compound Object JAIL Display:
+
 * [JAIL](https://github.com/sebarmeli/JAIL) library 
-    * If utilizing the lazy loading image ability of the solution pack, enable the "Islandora Compound Object JAIL Display" block and ensure the JAIL library is present within sites/all/libraries/JAIL.
 
 ## Installation
 
