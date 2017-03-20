@@ -30,7 +30,7 @@ Set the 'Child relationship predicate' and 'Solr filter query', as well as selec
 Optionally, enable the JAIL compound block to utilize the lazy loading image
 ability as outlined below.
 
-![Configuration](https://cloud.githubusercontent.com/assets/2738244/19966518/7943aba2-a1a2-11e6-8e17-9da13ef23fc6.png)
+![compoundobjectconfiguration](https://cloud.githubusercontent.com/assets/11573234/24051389/495bd84a-0b08-11e7-838e-b057acd302bf.JPG)
 
 **Block**:
 
