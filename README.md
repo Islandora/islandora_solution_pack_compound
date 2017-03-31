@@ -30,17 +30,21 @@ Set the 'Child relationship predicate' and 'Solr filter query', as well as selec
 Optionally, enable the JAIL compound block to utilize the lazy loading image
 ability as outlined below.
 
-![Configuration](https://cloud.githubusercontent.com/assets/2738244/19966518/7943aba2-a1a2-11e6-8e17-9da13ef23fc6.png)
+![Configuration](https://cloud.githubusercontent.com/assets/11573234/24557551/165e1a1c-1606-11e7-854b-0ec48ef29ae5.JPG)
+
 
 **Block**:
 
-There exists two block options for displaying compound objects within Islandora.
+There exist two block options for displaying compound objects within Islandora.
 The default "Islandora Compound Object Navigation" block will provide navigation
 controls and loading of all objects related to the parent compound. The latter
 option is a block utilizing the [JAIL](https://github.com/sebarmeli/JAIL)
 library which allows for lazy loading of images. This allows the block to load
 images only when they are being accessed which will greatly increase performance
 on compounds with many children.
+
+![compobjblocks_to_configure01b](https://cloud.githubusercontent.com/assets/11573234/24410256/9e01dfc0-13a0-11e7-9edf-454addc13128.JPG)
+
 
 **Theme**:
 
