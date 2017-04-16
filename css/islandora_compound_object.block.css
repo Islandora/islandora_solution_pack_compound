@@ -1,6 +1,15 @@
+#block-islandora-compound-object-compound-navigation {
+    height: 100px;
+    height: 200px;
+    width: 100%;
+    overflow-x: hidden;
+    overflow-y: scroll;
+    overflow: -moz-scrollbars-vertical;
+    font-size: 90%;
+}
 .islandora-compound-title {
   font-weight: bold;
-  display: inline-block;
+  display: block;
   font-size: 85%;
   line-height: 1.5em;
 }
