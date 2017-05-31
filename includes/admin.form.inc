@@ -81,6 +81,13 @@ function islandora_compound_object_admin_form($form, &$form_state) {
     '#element_validate' => array('islandora_compound_object_admin_form_jail_validation'),
   );
 
+  $form['islandora_compound_tn_deriv_hooks'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Use derivative hooks for parent thumbnail updates?'),
+    '#description' => t('Changes to the TN datastream of a compounds first child will be reflected on the parent.'),
+    '#default_value' => variable_get('islandora_compound_tn_deriv_hooks', FALSE),
+  );
+
   $form['islandora_compound_object_show_compound_parents_in_breadcrumbs'] = array(
     '#type' => 'checkbox',
     '#title' => t('Display compound object parents in the breadcrumbs on children objects.'),

@@ -268,17 +268,91 @@ function islandora_compound_object_access(AbstractObject $object) {
 }
 
 /**
- * Replaces parent object thumbnail with child's thumbnail.
+ * Implements hook_compound_cmodel_islandora_derivative().
  */
-function islandora_compound_object_update_parent_thumbnail($parent) {
+function islandora_compound_object_compound_cmodel_islandora_derivative(AbstractObject $object = NULL, $ds_modified_params = array()) {
+  $module_path = drupal_get_path('module', 'islandora_solution_pack_compound');
+  return array(
+    array(
+      'source_dsid' => NULL,
+      'destination_dsid' => 'TN',
+      'function' => array('islandora_compound_object_update_parent_thumbnail'),
+      'file' => "$module_path/islandora_compound_object.module",
+    ),
+  );
+
+}
+
+/**
+ * Implements hook_islandora_derivative.
+ */
+function islandora_compound_object_islandora_derivative(AbstractObject $object) {
+  return array(
+    array(
+      'source_dsid' => 'TN',
+      'destination_dsid' => NULL,
+      'function' => array('islandora_compound_object_update_parent_thumbnail_from_child'),
+    ),
+  );
+}
+
+/**
+ * Update parent from child object.
+ *
+ * Given a child object, check to see if it is part of
+ * a compound and update the parent's TN datastream.
+ *
+ * @param AbstractObject $child
+ *   The potential child object.
+ */
+function islandora_compound_object_update_parent_thumbnail_from_child(AbstractObject $child) {
   module_load_include('inc', 'islandora', 'includes/utilities');
+
+  // Test if child has a parent.
+  $compound_info = islandora_compound_object_retrieve_compound_info($child);
+  if (empty($compound_info)) {
+    return;
+  }
+  // Test if child is the first child of the compound.
+  if (empty($compound_info['previous_pid'])) {
+    $parent = islandora_object_load($compound_info['parent_pid']);
+    // Child doesn't have a thumbnail then we can't set the parents TN either.
+    if (empty($child['TN'])) {
+      // Parents with first children with no TN shouldn't have one either.
+      if (isset($parent['TN'])) {
+        $parent->purgeDatastream('TN');
+      }
+      return;
+    }
+    islandora_compound_object_update_parent_thumbnail($parent, $child);
+  }
+}
+
+/**
+ * Update a parent object's TN by deriving it's first child's TN.
+ *
+ * @param AbstractObject $parent
+ *   The compound object.
+ * @param AbstractObject $child
+ *   The child object (optional).
+ */
+function islandora_compound_object_update_parent_thumbnail(AbstractObject $parent, AbstractObject $child = NULL) {
+  // Short circuit if feature is disabled.
+  if (!variable_get('islandora_compound_tn_deriv_hooks', FALSE)) {
+    return;
+  }
+  module_load_include('inc', 'islandora', 'includes/utilities');
+
   $parts = islandora_compound_object_get_parts($parent->id);
   if (!empty($parts)) {
-    $child = islandora_object_load($parts[0]);
+    if ($child == NULL) {
+      $child = islandora_object_load($parts[0]);
+    }
     // Child doesn't have a thumbnail then we can't set the parents TN either.
     if (empty($child['TN'])) {
       return;
     }
+
     $mime_detector = new MimeDetect();
     $ext = $mime_detector->getExtension($child['TN']->mimeType);
     // Windows will likely store temp data in a temp directory
@@ -289,14 +363,20 @@ function islandora_compound_object_update_parent_thumbnail($parent) {
     $child['TN']->getContent($file);
     if (empty($parent['TN'])) {
       $ds = $parent->constructDatastream('TN', 'M');
+      $ds->setContentFromFile($file, TRUE);
+      $ds->label = $child['TN']->label;
+      $ds->mimetype = $child['TN']->mimetype;
       $parent->ingestDatastream($ds);
     }
     else {
-      $ds = $parent['TN'];
+      if ($parent['TN']->label != $child['TN']->label) {
+        $parent['TN']->label = $child['TN']->label;
+      }
+      if ($parent['TN']->mimeType != $child['TN']->mimetype) {
+        $parent['TN']->mimetype = $child['TN']->mimetype;
+      }
+      $parent['TN']->setContentFromFile($file, TRUE);
     }
-    $ds->setContentFromFile($file, TRUE);
-    $ds->label = 'Thumbnail';
-    $ds->mimetype = $mime_detector->getMimetype($file);
 
     file_unmanaged_delete($file);
   }
