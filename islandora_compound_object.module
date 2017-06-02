@@ -284,7 +284,7 @@ function islandora_compound_object_compound_cmodel_islandora_derivative(Abstract
 }
 
 /**
- * Implements hook_islandora_derivative.
+ * Implements hook_islandora_derivative().
  */
 function islandora_compound_object_islandora_derivative(AbstractObject $object) {
   return array(
@@ -308,7 +308,7 @@ function islandora_compound_object_islandora_derivative(AbstractObject $object) 
 function islandora_compound_object_update_parent_thumbnail_from_child(AbstractObject $child) {
   module_load_include('inc', 'islandora', 'includes/utilities');
   // Short circuit if feature is disabled.
-  if (!variable_get('islandora_compound_tn_deriv_hooks', FALSE)) {
+  if (!variable_get('islandora_compound_object_tn_deriv_hooks', FALSE)) {
     return;
   }
   // Test if child has a parent.
@@ -341,7 +341,7 @@ function islandora_compound_object_update_parent_thumbnail_from_child(AbstractOb
  */
 function islandora_compound_object_update_parent_thumbnail(AbstractObject $parent, AbstractObject $child = NULL) {
   // Short circuit if feature is disabled.
-  if (!variable_get('islandora_compound_tn_deriv_hooks', FALSE)) {
+  if (!variable_get('islandora_compound_object_tn_deriv_hooks', FALSE)) {
     return;
   }
   module_load_include('inc', 'islandora', 'includes/utilities');
