@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Holds block definitions for the compound solution pack.
+ * Holds derivative functionality for compound solution pack.
  */
 
 /**
