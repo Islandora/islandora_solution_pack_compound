@@ -313,10 +313,6 @@ function islandora_compound_object_islandora_derivative(AbstractObject $object) 
  *   The child object (optional).
  */
 function islandora_compound_object_update_parent_thumbnail(AbstractObject $parent, AbstractObject $child = NULL) {
-  // Short circuit if feature is disabled.
-  if (!variable_get('islandora_compound_object_tn_deriv_hooks', FALSE)) {
-    return;
-  }
   module_load_include('inc', 'islandora', 'includes/utilities');
 
   $parts = islandora_compound_object_get_parts($parent->id);

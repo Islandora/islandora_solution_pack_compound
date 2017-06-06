@@ -29,34 +29,32 @@ function islandora_compound_object_create_thumbnail(AbstractObject $object, $for
     return array(
       'success' => TRUE,
       'messages' => array(
-      array(
-        'message' => t('Updated @dsid on @parent.'),
-        'message_sub' => array(
-          '@dsid' => 'TN',
-          '@parent' => $object->id,
+        array(
+          'message' => t('Updated @dsid on @parent.'),
+          'message_sub' => array(
+            '@dsid' => 'TN',
+            '@parent' => $object->id,
+          ),
+          'type' => 'dsm',
+          'severity' => 'status',
         ),
-        'type' => 'dsm',
-        'severity' => 'status',
       ),
-      ),
-      'file' => 'islandora_compound_object.module',
     );
   }
   else {
     return array(
       'success' => FALSE,
       'messages' => array(
-      array(
-        'message' => t('Failed to update @dsid on @parent.'),
-        'message_sub' => array(
-          '@dsid' => 'TN',
-          '@parent' => $object->id,
+        array(
+          'message' => t('Failed to update @dsid on @parent.'),
+          'message_sub' => array(
+            '@dsid' => 'TN',
+            '@parent' => $object->id,
+          ),
+          'type' => 'watchdog',
+          'severity' => WATCHDOG_ERROR,
         ),
-        'type' => 'watchdog',
-        'severity' => WATCHDOG_ERROR,
       ),
-      ),
-      'file' => 'islandora_compound_object.module',
     );
   }
 }
@@ -98,52 +96,33 @@ function islandora_compound_object_create_thumbnail_on_parent(AbstractObject $ch
       return array(
         'success' => TRUE,
         'messages' => array(
-        array(
-          'message' => t('Updated @dsid on @parent.'),
-          'message_sub' => array(
-            '@dsid' => 'TN',
-            '@parent' => $parent->id,
+          array(
+            'message' => t('Updated @dsid on @parent.'),
+            'message_sub' => array(
+              '@dsid' => 'TN',
+              '@parent' => $parent->id,
+            ),
+            'type' => 'dsm',
+            'severity' => 'status',
           ),
-          'type' => 'dsm',
-          'severity' => 'status',
         ),
-        ),
-        'file' => 'islandora_compound_object.module',
       );
     }
     else {
       return array(
         'success' => FALSE,
         'messages' => array(
-        array(
-          'message' => t('Failed to update @dsid on @parent.'),
-          'message_sub' => array(
-            '@dsid' => 'TN',
-            '@parent' => $parent->id,
+          array(
+            'message' => t('Failed to update @dsid on @parent.'),
+            'message_sub' => array(
+              '@dsid' => 'TN',
+              '@parent' => $parent->id,
+            ),
+            'type' => 'watchdog',
+            'severity' => WATCHDOG_ERROR,
           ),
-          'type' => 'watchdog',
-          'severity' => WATCHDOG_ERROR,
         ),
-        ),
-        'file' => 'islandora_compound_object.module',
       );
     }
-  }
-  else {
-    return array(
-      'success' => FALSE,
-      'messages' => array(
-      array(
-        'message' => t('Failed to update @dsid of @child.'),
-        'message_sub' => array(
-          '@dsid' => 'TN',
-          '@child' => $child->id,
-        ),
-        'type' => 'watchdog',
-        'severity' => WATCHDOG_ERROR,
-      ),
-      ),
-      'file' => 'islandora_compound_object.module',
-    );
   }
 }
