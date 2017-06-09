@@ -271,7 +271,7 @@ function islandora_compound_object_access(AbstractObject $object) {
  * Implements hook_compound_cmodel_islandora_derivative().
  */
 function islandora_compound_object_compoundCModel_islandora_derivative(AbstractObject $object = NULL, $ds_modified_params = array()) {
-  $module_path = drupal_get_path('module', 'islandora_solution_pack_compound');
+  $module_path = drupal_get_path('module', 'islandora_compound_object');
   $derivatives = array();
   if (variable_get('islandora_compound_object_tn_deriv_hooks', FALSE)) {
     $derivatives[] = array(
@@ -290,7 +290,7 @@ function islandora_compound_object_compoundCModel_islandora_derivative(AbstractO
  * Implements hook_islandora_derivative().
  */
 function islandora_compound_object_islandora_derivative(AbstractObject $object) {
-  $module_path = drupal_get_path('module', 'islandora_solution_pack_compound');
+  $module_path = drupal_get_path('module', 'islandora_compound_object');
   $derivatives = array();
   // Short circuit if feature is disabled.
   if (variable_get('islandora_compound_object_tn_deriv_hooks', FALSE)) {
