@@ -316,53 +316,50 @@ function islandora_compound_object_islandora_derivative(AbstractObject $object) 
  * @param AbstractObject $child
  *   The child object (optional). Note: Ideally, this would be required.
  *   Keeping it optional for backwards compatibility.
- * @param bool $force
- *   Boolean for forcing this derivative creation.
  */
-function islandora_compound_object_update_parent_thumbnail(AbstractObject $parent, AbstractObject $child = NULL, $force = TRUE) {
+function islandora_compound_object_update_parent_thumbnail(AbstractObject $parent, AbstractObject $child = NULL) {
   module_load_include('inc', 'islandora', 'includes/utilities');
 
   // Leaving this part in for backwards compatibility. As per doc comment,
   // it would be ideal for the caller to be required to provide both objects.
-  if ($force || !isset($parent['TN'])) {
-    if ($child == NULL) {
-      $parts = islandora_compound_object_get_parts($parent->id);
-      if (!empty($parts)) {
-        $child = islandora_object_load($parts[0]);
-      }
-    }
-    if ($child != NULL && !empty($child['TN'])) {
-      $mime_detector = new MimeDetect();
-      $ext = $mime_detector->getExtension($child['TN']->mimeType);
-      // Windows will likely store temp data in a temp directory
-      // rather than in memory. Since the colon is forbidden in
-      // filenames, replace it with an underscore instead.
-      $thumbnail_id = ((islandora_deployed_on_windows()) ? str_replace(':', '_', $child->id) : $child->id);
-      $file = drupal_realpath("temporary://{$thumbnail_id}_TN.{$ext}");
-      $child['TN']->getContent($file);
-      if (empty($parent['TN'])) {
-        $ds = $parent->constructDatastream('TN', 'M');
-        $ds->setContentFromFile($file, TRUE);
-        $ds->label = $child['TN']->label;
-        $ds->mimetype = $child['TN']->mimetype;
-        $parent->ingestDatastream($ds);
-      }
-      else {
-        if ($parent['TN']->label != $child['TN']->label) {
-          $parent['TN']->label = $child['TN']->label;
-        }
-        if ($parent['TN']->mimeType != $child['TN']->mimetype) {
-          $parent['TN']->mimetype = $child['TN']->mimetype;
-        }
-        $parent['TN']->setContentFromFile($file, TRUE);
-      }
-      file_unmanaged_delete($file);
-    }
-    // Child doesn't have a thumbnail then we can't set the parents TN either.
-    elseif (isset($parent['TN'])) {
-      $parent->purgeDatastream('TN');
+  if ($child == NULL) {
+    $parts = islandora_compound_object_get_parts($parent->id);
+    if (!empty($parts)) {
+      $child = islandora_object_load($parts[0]);
     }
   }
+  if ($child != NULL && !empty($child['TN'])) {
+    $mime_detector = new MimeDetect();
+    $ext = $mime_detector->getExtension($child['TN']->mimeType);
+    // Windows will likely store temp data in a temp directory
+    // rather than in memory. Since the colon is forbidden in
+    // filenames, replace it with an underscore instead.
+    $thumbnail_id = ((islandora_deployed_on_windows()) ? str_replace(':', '_', $child->id) : $child->id);
+    $file = drupal_realpath("temporary://{$thumbnail_id}_TN.{$ext}");
+    $child['TN']->getContent($file);
+    if (empty($parent['TN'])) {
+      $ds = $parent->constructDatastream('TN', 'M');
+      $ds->setContentFromFile($file, TRUE);
+      $ds->label = $child['TN']->label;
+      $ds->mimetype = $child['TN']->mimetype;
+      $parent->ingestDatastream($ds);
+    }
+    else {
+      if ($parent['TN']->label != $child['TN']->label) {
+        $parent['TN']->label = $child['TN']->label;
+      }
+      if ($parent['TN']->mimeType != $child['TN']->mimetype) {
+        $parent['TN']->mimetype = $child['TN']->mimetype;
+      }
+      $parent['TN']->setContentFromFile($file, TRUE);
+    }
+    file_unmanaged_delete($file);
+  }
+  // Child doesn't have a thumbnail then we can't set the parents TN either.
+  elseif (isset($parent['TN'])) {
+    $parent->purgeDatastream('TN');
+  }
+
 }
 
 /**
