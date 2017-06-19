@@ -20,8 +20,8 @@
  *   Success message.
  */
 function islandora_compound_object_create_thumbnail(AbstractObject $object, $force = TRUE) {
-  $parts = islandora_compound_object_get_parts($object->id);
   if ($force || !isset($object['TN'])) {
+    $parts = islandora_compound_object_get_parts($object->id);
     if (!empty($parts)) {
       $child = islandora_object_load($parts[0]);
       islandora_compound_object_update_parent_thumbnail($object, $child);
@@ -76,8 +76,6 @@ function islandora_compound_object_create_thumbnail(AbstractObject $object, $for
  *   Success message.
  */
 function islandora_compound_object_create_thumbnail_on_parent(AbstractObject $child, $force = TRUE) {
-  module_load_include('inc', 'islandora', 'includes/utilities');
-
   // Test if child has a parent.
   $compound_info = islandora_compound_object_retrieve_compound_info($child);
   if (empty($compound_info)) {
