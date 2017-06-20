@@ -91,7 +91,7 @@ function islandora_compound_object_create_thumbnail_on_parent(AbstractObject $ch
         if (isset($parent['TN'])) {
           $parent->purgeDatastream('TN');
         }
-        return null;
+        return NULL;
       }
       islandora_compound_object_update_parent_thumbnail($parent, $child);
       if (isset($parent['TN']) && $parent['TN']->size == $child['TN']->size) {
