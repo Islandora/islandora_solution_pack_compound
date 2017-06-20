@@ -26,7 +26,7 @@ function islandora_compound_object_create_thumbnail(AbstractObject $object, $for
       $child = islandora_object_load($parts[0]);
       islandora_compound_object_update_parent_thumbnail($object, $child);
     }
-    if (isset($child) && $object['TN'] == $child['TN']) {
+    if (isset($child) && $object['TN']->size == $child['TN']->size) {
       return array(
         'success' => TRUE,
         'messages' => array(
@@ -72,7 +72,7 @@ function islandora_compound_object_create_thumbnail(AbstractObject $object, $for
  * @param bool $force
  *   Boolean for forcing this derivative creation.
  *
- * @return array|NULL
+ * @return array|null
  *   Success message.
  */
 function islandora_compound_object_create_thumbnail_on_parent(AbstractObject $child, $force = TRUE) {
@@ -91,10 +91,10 @@ function islandora_compound_object_create_thumbnail_on_parent(AbstractObject $ch
         if (isset($parent['TN'])) {
           $parent->purgeDatastream('TN');
         }
-        return NULL;
+        return null;
       }
       islandora_compound_object_update_parent_thumbnail($parent, $child);
-      if (isset($parent['TN']) && $parent['TN'] == $child['TN']) {
+      if (isset($parent['TN']) && $parent['TN']->size == $child['TN']->size) {
         return array(
           'success' => TRUE,
           'messages' => array(
