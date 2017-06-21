@@ -24,9 +24,25 @@ function islandora_compound_object_create_thumbnail(AbstractObject $object, $for
     $parts = islandora_compound_object_get_parts($object->id);
     if (!empty($parts)) {
       $child = islandora_object_load($parts[0]);
-      islandora_compound_object_update_parent_thumbnail($object, $child);
-    }
-    if (isset($child) && $object['TN']->size == $child['TN']->size) {
+      try {
+        islandora_compound_object_update_parent_thumbnail($object, $child);
+      }
+      catch (Exception $e) {
+        return array(
+          'success' => FALSE,
+          'messages' => array(
+            array(
+              'message' => t('Failed to update @dsid on @parent.'),
+              'message_sub' => array(
+                '@dsid' => 'TN',
+                '@parent' => $object->id,
+              ),
+              'type' => 'watchdog',
+              'severity' => WATCHDOG_ERROR,
+            ),
+          ),
+        );
+      }
       return array(
         'success' => TRUE,
         'messages' => array(
@@ -42,22 +58,7 @@ function islandora_compound_object_create_thumbnail(AbstractObject $object, $for
         ),
       );
     }
-    else {
-      return array(
-        'success' => FALSE,
-        'messages' => array(
-          array(
-            'message' => t('Failed to update @dsid on @parent.'),
-            'message_sub' => array(
-              '@dsid' => 'TN',
-              '@parent' => $object->id,
-            ),
-            'type' => 'watchdog',
-            'severity' => WATCHDOG_ERROR,
-          ),
-        ),
-      );
-    }
+   // Should we error here?
   }
 }
 
@@ -93,24 +94,10 @@ function islandora_compound_object_create_thumbnail_on_parent(AbstractObject $ch
         }
         return NULL;
       }
-      islandora_compound_object_update_parent_thumbnail($parent, $child);
-      if (isset($parent['TN']) && $parent['TN']->size == $child['TN']->size) {
-        return array(
-          'success' => TRUE,
-          'messages' => array(
-            array(
-              'message' => t('Updated @dsid on @parent.'),
-              'message_sub' => array(
-                '@dsid' => 'TN',
-                '@parent' => $parent->id,
-              ),
-              'type' => 'dsm',
-              'severity' => 'status',
-            ),
-          ),
-        );
+      try {
+        islandora_compound_object_update_parent_thumbnail($parent, $child);
       }
-      else {
+      catch (Exception $e) {
         return array(
           'success' => FALSE,
           'messages' => array(
@@ -126,6 +113,22 @@ function islandora_compound_object_create_thumbnail_on_parent(AbstractObject $ch
           ),
         );
       }
+
+      return array(
+        'success' => TRUE,
+        'messages' => array(
+          array(
+            'message' => t('Updated @dsid on @parent.'),
+            'message_sub' => array(
+              '@dsid' => 'TN',
+              '@parent' => $parent->id,
+            ),
+            'type' => 'dsm',
+            'severity' => 'status',
+          ),
+        ),
+      );
     }
   }
+
 }
