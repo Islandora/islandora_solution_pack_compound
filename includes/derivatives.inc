@@ -67,6 +67,12 @@ function islandora_compound_object_create_thumbnail(AbstractObject $object, $for
  *
  * Given a child object, check to see if it is part of
  * a compound and update the parent's TN datastream.
+ * Child objects of objects whose content model is NOT
+ * islandora:compoundCModel will be ignored by this functionality.
+ * Only islandora:compoundCModel parents will run a derivative to
+ * check their children for TN sync. We add this check here to ensure
+ * that the inverse is also true and the non-compound child don't try
+ * to change their parents.
  *
  * @param AbstractObject $child
  *   The potential child object.
@@ -85,7 +91,13 @@ function islandora_compound_object_create_thumbnail_on_parent(AbstractObject $ch
   if ($force || !isset($compound_info['TN'])) {
     // Test if child is the first child of the compound.
     if (empty($compound_info['previous_pid'])) {
+
       $parent = islandora_object_load($compound_info['parent_pid']);
+      // Ignore object which aren't explicitly compound objects.
+      if(!in_array('islandora:compoundCModel', $parent->models)){
+        return NULL;
+      }
+
       // Child doesn't have a thumbnail then we can't set the parents TN either.
       if (empty($child['TN'])) {
         // Parents with first children with no TN shouldn't have one either.
