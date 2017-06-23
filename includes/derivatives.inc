@@ -58,7 +58,6 @@ function islandora_compound_object_create_thumbnail(AbstractObject $object, $for
         ),
       );
     }
-   // Should we error here?
   }
 }
 
@@ -93,8 +92,8 @@ function islandora_compound_object_create_thumbnail_on_parent(AbstractObject $ch
     if (empty($compound_info['previous_pid'])) {
 
       $parent = islandora_object_load($compound_info['parent_pid']);
-      // Ignore object which aren't explicitly compound objects.
-      if(!in_array('islandora:compoundCModel', $parent->models)){
+      // Ignore objects which aren't explicitly compound objects.
+      if (!in_array('islandora:compoundCModel', $parent->models)) {
         return NULL;
       }
 
