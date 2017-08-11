@@ -289,7 +289,7 @@ function islandora_compound_object_compoundCModel_islandora_derivative(AbstractO
 /**
  * Implements hook_islandora_derivative().
  */
-function islandora_compound_object_islandora_derivative(AbstractObject $object) {
+function islandora_compound_object_islandora_derivative(AbstractObject $object = NULL, $ds_modified_params = array()) {
   $module_path = drupal_get_path('module', 'islandora_compound_object');
   $derivatives = array();
   // Short circuit if feature is disabled.
