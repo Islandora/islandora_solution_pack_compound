@@ -270,7 +270,7 @@ function islandora_compound_object_access(AbstractObject $object) {
 /**
  * Implements hook_compound_cmodel_islandora_derivative().
  */
-function islandora_compound_object_compoundCModel_islandora_derivative(AbstractObject $object = NULL, $ds_modified_params = array()) {
+function islandora_compound_object_islandora_compoundCModel_islandora_derivative(AbstractObject $object = NULL, $ds_modified_params = array()) {
   $module_path = drupal_get_path('module', 'islandora_compound_object');
   $derivatives = array();
   if (variable_get('islandora_compound_object_tn_deriv_hooks', FALSE)) {
