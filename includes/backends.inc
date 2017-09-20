@@ -113,7 +113,7 @@ WHERE {
   FILTER((!bound(?role) && !bound(?user)) || (bound(?user) && ?user='{$user_name}') || (bound(?role) && ($role_matcher)))
   $namespace_filter
 }
-ORDER BY ASC(?seq)
+ORDER BY ASC(?seq+0)
 EOQ;
 
   $connection = islandora_get_tuque_connection();
