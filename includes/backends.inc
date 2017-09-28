@@ -31,8 +31,8 @@ EOQ;
 
     // Sort the objects into their proper order.
     $sort = function($a, $b) {
-      $a = $a['seq']['value'];
-      $b = $b['seq']['value'];
+      $a = intval($a['seq']['value']);
+      $b = intval($b['seq']['value']);
       if ($a === $b) {
         return 0;
       }
@@ -113,11 +113,31 @@ WHERE {
   FILTER((!bound(?role) && !bound(?user)) || (bound(?user) && ?user='{$user_name}') || (bound(?role) && ($role_matcher)))
   $namespace_filter
 }
-ORDER BY ASC(?seq)
 EOQ;
+
+  // Removed the ORDER BY from the SPARQL query so that the values are sorted sequentially 
+  // by their integer NUMERIC values.
+  // ORDER BY ASC(?seq)
 
   $connection = islandora_get_tuque_connection();
   $results = $connection ? $connection->repository->ri->sparqlQuery($query) : array();
+
+  // Sort the objects into their proper order by their integer values.
+  $sort = function($a, $b) {
+    $a = intval($a['seq']['value']);
+    $b = intval($b['seq']['value']);
+    if ($a === $b) {
+      return 0;
+    }
+    if (empty($a)) {
+      return 1;
+    }
+    if (empty($b)) {
+      return -1;
+    }
+    return $a - $b;
+  };
+  uasort($results, $sort);
 
   foreach ($results as $result) {
     $objects[$result['object']['value']] = array(
