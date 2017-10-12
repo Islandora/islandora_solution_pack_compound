@@ -115,8 +115,8 @@ WHERE {
 }
 EOQ;
 
-  // Removed the ORDER BY from the SPARQL query so that the values are sorted sequentially 
-  // by their integer NUMERIC values.
+  // Removed the ORDER BY from the SPARQL query so that the values are sorted
+  // sequentially by their integer NUMERIC values.
   // ORDER BY ASC(?seq)
 
   $connection = islandora_get_tuque_connection();
