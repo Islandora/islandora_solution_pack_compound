@@ -87,7 +87,7 @@ function islandora_compound_object_jail_display_block() {
           '#attributes' => array(),
           'link' => array(
             '#type' => 'link',
-            '#title' => t("@title", array("@title" => $sibling['title'])),
+            '#title' => $sibling['title'],
             '#href' => "islandora/object/{$sibling['pid']}",
             '#options' => array('query' => $query_params),
           ),
