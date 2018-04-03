@@ -568,10 +568,17 @@ function islandora_compound_object_menu_local_tasks_alter(&$data, $router_item, 
       $compound_object = menu_get_object('islandora_object', 2);
       $compound_info = islandora_compound_object_retrieve_compound_info($compound_object, TRUE);
       if ($compound_info) {
-        drupal_set_title(t('@parent - @child', array(
-          '@parent' => $compound_info['parent_label'],
-          '@child' => $compound_info['label'],
-        )), PASS_THROUGH);
+        if ($compound_object->id == $compound_info['parent_pid']) {
+          // We are the parent so don't repeat the label twice.
+          drupal_set_title($compound_info['parent_label']);
+        }
+        else {
+          // Display both the parent and child label.
+          drupal_set_title(t('@parent - @child', array(
+            '@parent' => $compound_info['parent_label'],
+            '@child' => $compound_info['label'],
+          )), PASS_THROUGH);
+        }
       }
       if (isset($data['tabs'][0]['output'])) {
         $query_params = drupal_get_query_parameters();
