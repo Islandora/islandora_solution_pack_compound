@@ -33,7 +33,7 @@
          array(
            'path' => $parent_tn,
            'attributes' => array(
-              'alt' => $parent_label,
+             'alt' => $parent_label,
            ),
          )
        ),
