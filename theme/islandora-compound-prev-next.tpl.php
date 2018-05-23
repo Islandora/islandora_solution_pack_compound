@@ -48,7 +48,11 @@
        theme_image(
          array(
            'path' => $sibling['TN'],
-           'attributes' => array('class' => $sibling['class']),
+           'attributes' => array(
+             'class' => $sibling['class'],
+             'title' => $sibling['label'],
+             'alt' => $sibling['label'],
+           ),
          )
        ),
        'islandora/object/' . $sibling['pid'],
