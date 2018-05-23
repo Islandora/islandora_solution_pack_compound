@@ -71,7 +71,13 @@
          )
        ),
        'islandora/object/' . $sibling['pid'],
-       array('html' => TRUE, 'query' => $query_params)
+       array(
+         'html' => TRUE,
+         'query' => $query_params,
+         'attributes' => array(
+           'title' => $sibling['label'],
+         )
+       )
      );?>
      </div>
    <?php endforeach; // each themed_siblings ?>
