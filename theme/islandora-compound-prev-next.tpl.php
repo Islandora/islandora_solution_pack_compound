@@ -65,6 +65,7 @@
            'path' => $sibling['TN'],
            'attributes' => array(
              'class' => $sibling['class'],
+             'title' => $sibling['label'],
              'alt' => $sibling['label'],
            ),
          )
