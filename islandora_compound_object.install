@@ -29,6 +29,9 @@ function islandora_compound_object_uninstall() {
     'islandora_compound_object_hide_child_objects_solr',
     'islandora_compound_object_solr_fq',
     'islandora_compound_object_use_jail_view',
+    'islandora_compound_object_query_backend',
+    'islandora_compound_object_tn_deriv_hooks',
+    'islandora_compound_object_redirect_to_first',
   );
   array_walk($variables, 'variable_del');
 }

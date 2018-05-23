@@ -10,6 +10,8 @@
 
 define('ISLANDORA_COMPOUND_OBJECT_CMODEL', 'islandora:compoundCModel');
 
+const ISLANDORA_COMPOUND_OBJECT_LEGACY_BACKEND = 'islandora_compound_object_legacy_sparql';
+
 /**
  * Implements hook_menu().
  */
@@ -118,11 +120,13 @@ function islandora_compound_object_block_info() {
     'info' => t('Islandora Compound Object Navigation'),
     'visibility' => BLOCK_VISIBILITY_LISTED,
     'pages' => 'islandora/object/*',
+    'cache' => DRUPAL_NO_CACHE,
   );
   $blocks['compound_jail_display'] = array(
     'info' => t('Islandora Compound Object JAIL Display'),
     'visibility' => BLOCK_VISIBILITY_LISTED,
     'pages' => 'islandora/object/*',
+    'cache' => DRUPAL_NO_CACHE,
   );
   return $blocks;
 }
@@ -135,6 +139,7 @@ function islandora_compound_object_block_view($delta = '') {
   switch ($delta) {
     case 'compound_navigation':
       if (!variable_get('islandora_compound_object_use_jail_view', FALSE)) {
+        module_load_include('inc', 'islandora_compound_object', 'includes/blocks');
         $block['subject'] = NULL;
         $block['content'] = islandora_compound_object_navigation_block();
       }
@@ -160,7 +165,7 @@ function islandora_compound_object_islandora_compoundcmodel_islandora_object_pur
   foreach ($parts as $part) {
     $escaped_pid = str_replace(':', '_', $pid);
     $child_object = islandora_object_load($part);
-    $child_object->relationships->remove('info:fedora/fedora-system:def/relations-external#', $rels_predicate, $pid);
+    $child_object->relationships->remove(FEDORA_RELS_EXT_URI, $rels_predicate, $pid);
     $child_object->relationships->remove(ISLANDORA_RELS_EXT_URI, "isSequenceNumberOf$escaped_pid");
   }
 }
@@ -178,7 +183,7 @@ function islandora_compound_object_islandora_required_objects(IslandoraTuque $co
 
   $datastream = $compound_content_model->constructDatastream('DS-COMPOSITE-MODEL', 'X');
   $datastream->label = 'DS-COMPOSITE-MODEL';
-  $datastream->mimetype = 'text/xml';
+  $datastream->mimetype = 'application/xml';
   $datastream->setContentFromFile("$module_path/xml/islandora_compound_ds_composite_model.xml", FALSE);
   $compound_content_model->ingestDatastream($datastream);
 
@@ -190,7 +195,7 @@ function islandora_compound_object_islandora_required_objects(IslandoraTuque $co
 
   $datastream = $compound_collection->constructDatastream('COLLECTION_POLICY', 'X');
   $datastream->label = 'Collection policy';
-  $datastream->mimetype = 'text/xml';
+  $datastream->mimetype = 'application/xml';
   $datastream->setContentFromFile("$module_path/xml/islandora_compound_collection_policy.xml", FALSE);
   $compound_collection->ingestDatastream($datastream);
 
@@ -212,9 +217,9 @@ function islandora_compound_object_islandora_required_objects(IslandoraTuque $co
 }
 
 /**
- * Implements hook_islandora_xml_form_builder_forms().
+ * Implements hook_xml_form_builder_forms().
  */
-function islandora_compound_object_islandora_xml_form_builder_forms() {
+function islandora_compound_object_xml_form_builder_forms() {
   $module_path = drupal_get_path('module', 'islandora_compound_object');
   return array(
     'Compound Object MODS form' => array(
@@ -224,9 +229,9 @@ function islandora_compound_object_islandora_xml_form_builder_forms() {
 }
 
 /**
- * Implements hook_islandora_xml_form_builder_form_associations().
+ * Implements hook_xml_form_builder_form_associations().
  */
-function islandora_compound_object_islandora_xml_form_builder_form_associations() {
+function islandora_compound_object_xml_form_builder_form_associations() {
   return array(
     'islandora_compound_mods_form' => array(
       'content_model' => ISLANDORA_COMPOUND_OBJECT_CMODEL,
@@ -240,46 +245,27 @@ function islandora_compound_object_islandora_xml_form_builder_form_associations(
 }
 
 /**
- * Render navigation block.
- */
-function islandora_compound_object_navigation_block() {
-  module_load_include('inc', 'islandora', 'includes/utilities');
-  drupal_add_css(drupal_get_path('module', 'islandora_compound_object') . '/css/islandora_compound_object.block.css');
-  if (arg(1) == 'object' && islandora_is_valid_pid(arg(2))) {
-
-    // If only compound cmodel objects can be compound, this isn't necessary.
-    $children = islandora_compound_object_get_parts(arg(2));
-    $pid = (!empty($children)) ? $children[0] : arg(2);
-    $object = islandora_object_load($pid);
-
-    $output = '';
-    if ($object) {
-      $compound_info = islandora_compound_object_retrieve_compound_info($object);
-
-      // This object is part of a compound object.
-      if (!empty($compound_info)) {
-        $prev_next = theme('islandora_compound_prev_next', $compound_info);
-        $output .= $prev_next;
-      }
-
-      if (!empty($output)) {
-        return array('#markup' => $output);
-      }
-    }
-  }
-}
-
-/**
  * Implements hook_islandora_cmodel_islandora_view_object().
  */
 function islandora_compound_object_islandora_compoundCModel_islandora_view_object($object) {
-  // Get view of first child.
   $children = islandora_compound_object_get_parts($object->id);
   if (!empty($children)) {
     $first_child_id = reset($children);
     if ($first_child_id != $object->id) {
-      $first_child = islandora_object_load($first_child_id);
-      return islandora_view_object($first_child);
+      if (variable_get('islandora_compound_object_redirect_to_first', FALSE)) {
+        // Redirect to the first child of a compound.
+        $redirect_path = 'islandora/object/' . $first_child_id;
+        $options = array();
+        $options['query'] = drupal_get_query_parameters();
+
+        drupal_goto($redirect_path, $options);
+      }
+      else {
+        // Get view of first child.
+        $first_child = islandora_object_load($first_child_id);
+        drupal_set_title($first_child->label);
+        return islandora_view_object($first_child);
+      }
     }
   }
 }
@@ -292,13 +278,67 @@ function islandora_compound_object_access(AbstractObject $object) {
 }
 
 /**
- * Replaces parent object thumbnail with child's thumbnail.
+ * Implements hook_CMODEL_islandora_derivative().
  */
-function islandora_compound_object_update_parent_thumbnail($parent) {
+function islandora_compound_object_islandora_compoundCModel_islandora_derivative(AbstractObject $object = NULL, $ds_modified_params = array()) {
+  $module_path = drupal_get_path('module', 'islandora_compound_object');
+  $derivatives = array();
+  if (variable_get('islandora_compound_object_tn_deriv_hooks', FALSE)) {
+    $derivatives[] = array(
+      'source_dsid' => NULL,
+      'destination_dsid' => 'TN',
+      'function' => array('islandora_compound_object_create_thumbnail'),
+      'file' => "$module_path/includes/derivatives.inc",
+    );
+  }
+
+  return $derivatives;
+
+}
+
+/**
+ * Implements hook_islandora_derivative().
+ */
+function islandora_compound_object_islandora_derivative(AbstractObject $object = NULL, $ds_modified_params = array()) {
+  $module_path = drupal_get_path('module', 'islandora_compound_object');
+  $derivatives = array();
+  // Short circuit if feature is disabled.
+  if (variable_get('islandora_compound_object_tn_deriv_hooks', FALSE)) {
+    $derivatives[] = array(
+      'source_dsid' => 'TN',
+      'destination_dsid' => NULL,
+      'function' => array('islandora_compound_object_create_thumbnail_on_parent'),
+      'file' => "$module_path/includes/derivatives.inc",
+    );
+  }
+  return $derivatives;
+}
+
+/**
+ * Update a parent object's TN by deriving it's first child's TN.
+ *
+ * Note: This method does not enforce the relationship between
+ * parent/child if both are provided. It is left up to the caller
+ * to ensure that objects provided have the appropriate relationship.
+ *
+ * @param AbstractObject $parent
+ *   The compound object.
+ * @param AbstractObject $child
+ *   The child object (optional). Note: Ideally, this would be required.
+ *   Keeping it optional for backwards compatibility.
+ */
+function islandora_compound_object_update_parent_thumbnail(AbstractObject $parent, AbstractObject $child = NULL) {
   module_load_include('inc', 'islandora', 'includes/utilities');
-  $parts = islandora_compound_object_get_parts($parent->id);
-  if (!empty($parts)) {
-    $child = islandora_object_load($parts[0]);
+
+  // Leaving this part in for backwards compatibility. As per doc comment,
+  // it would be ideal for the caller to be required to provide both objects.
+  if ($child == NULL) {
+    $parts = islandora_compound_object_get_parts($parent->id);
+    if (!empty($parts)) {
+      $child = islandora_object_load($parts[0]);
+    }
+  }
+  if ($child != NULL && !empty($child['TN'])) {
     $mime_detector = new MimeDetect();
     $ext = $mime_detector->getExtension($child['TN']->mimeType);
     // Windows will likely store temp data in a temp directory
@@ -309,17 +349,30 @@ function islandora_compound_object_update_parent_thumbnail($parent) {
     $child['TN']->getContent($file);
     if (empty($parent['TN'])) {
       $ds = $parent->constructDatastream('TN', 'M');
+      $ds->setContentFromFile($file, TRUE);
+      $ds->label = $child['TN']->label;
+      $ds->mimetype = $child['TN']->mimetype;
       $parent->ingestDatastream($ds);
     }
     else {
-      $ds = $parent['TN'];
+      // Check the size and then the content for equality.
+      // Only set if both are unequal.
+      if (($parent['TN']->size != $child['TN']->size) &&
+        $parent['TN']->content != $child['TN']->content) {
+        // Check label equality before setting label.
+        if ($parent['TN']->label != $child['TN']->label) {
+          $parent['TN']->label = $child['TN']->label;
+        }
+        // Check mimetype equality before setting mimetype.
+        if ($parent['TN']->mimeType != $child['TN']->mimetype) {
+          $parent['TN']->mimetype = $child['TN']->mimetype;
+        }
+        $parent['TN']->setContentFromFile($file, TRUE);
+      }
     }
-    $ds->setContentFromFile($file, TRUE);
-    $ds->label = 'Thumbnail';
-    $ds->mimetype = $mime_detector->getMimetype($file);
-
     file_unmanaged_delete($file);
   }
+  // Child doesn't have a thumbnail then we can't set the parents TN either.
   elseif (isset($parent['TN'])) {
     $parent->purgeDatastream('TN');
   }
@@ -328,47 +381,67 @@ function islandora_compound_object_update_parent_thumbnail($parent) {
 /**
  * Autocomplete callback for child object search.
  *
- * @string string $string
+ * @param string $string
  *   The user supplied string that is being searched for.
+ * @param bool $parent
+ *   A flag indicating if we are to return objects usable as parents.
  */
 function islandora_compound_object_autocomplete($string, $parent = FALSE) {
   $matches = array();
   $islandora_tuque = islandora_get_tuque_connection();
   $compound_enforcement = variable_get('islandora_compound_object_compound_children', TRUE);
 
+  // Build escapes as per:
+  // - https://www.w3.org/TR/xmlschema-2/#dt-metac and
+  // - https://www.w3.org/TR/xmlschema-2/#dt-cces1
+  $meta = array(
+    '\\',
+    '.',
+    '?',
+    '*',
+    '+',
+    '{',
+    '}',
+    '(',
+    ')',
+    '[',
+    ']',
+    '|',
+    '-',
+    '^',
+  );
+  $escape_meta = function ($meta) {
+    return "\\\\$meta";
+  };
+  $meta_replacements = drupal_map_assoc($meta, $escape_meta);
+
+  $replacements = array(
+    '!compound_model' => '?model',
+    '!text' => str_replace(array_keys($meta_replacements), $meta_replacements, $string),
+  );
   if ($compound_enforcement && $parent) {
-    $parent_query = <<<EOQ
-SELECT ?pid ?title FROM <#ri>
-WHERE {
-  ?pid <fedora-model:hasModel> <info:fedora/islandora:compoundCModel> ;
-       <fedora-model:label> ?title
-}
-EOQ;
-    $results = $islandora_tuque->repository->ri->sparqlQuery($parent_query, 'unlimited');
-  }
-  else {
-    $results = $islandora_tuque->api->a->findObjects('terms', '*' . $string . '*', 10);
+    $compound_model = ISLANDORA_COMPOUND_OBJECT_CMODEL;
+    $replacements['!compound_model'] = "<info:fedora/$compound_model>";
   }
 
-  // Need to parse results differently for the SPARQL query versus findObjects.
-  if ($compound_enforcement && $parent) {
-    foreach ($results as $result) {
-      if (strpos(drupal_strtoupper($result['title']['value']), drupal_strtoupper($string)) !== FALSE) {
-        $matches[$result['pid']['value']] = $result['title']['value'] . ' (' . $result['pid']['value'] . ')';
-      }
-    }
-  }
-  else {
-    foreach ($results['results'] as $result) {
-      // Empty array elements getting sent through.
-      if (is_array($result['title'])) {
-        $title = $result['title'][0];
-      }
-      else {
-        $title = $result['title'];
-      }
-      $matches[$result['pid']] = $title . ' (' . $result['pid'] . ')';
-    }
+  $query = <<<'EOQ'
+SELECT DISTINCT ?pid ?title
+FROM <#ri>
+WHERE {
+  ?pid <fedora-model:hasModel> !compound_model ;
+       <fedora-model:label> ?title .
+  FILTER(regex(?title, "!text", 'i') || regex(str(?pid), "!text", 'i'))
+}
+LIMIT 10
+EOQ;
+  $query = format_string($query, $replacements);
+  $results = $islandora_tuque->repository->ri->sparqlQuery($query, 'unlimited');
+
+  foreach ($results as $result) {
+    $matches[$result['pid']['value']] = t('!title (!pid)', array(
+      '!title' => $result['title']['value'],
+      '!pid' => $result['pid']['value'],
+    ));
   }
   drupal_json_output($matches);
 }
@@ -414,57 +487,27 @@ function islandora_compound_object_islandora_solr_query($islandora_solr_query) {
  * Return an array of pids that are part of a compound object.
  */
 function islandora_compound_object_get_parts($pid, $ret_title = FALSE) {
-  $rels_predicate = variable_get('islandora_compound_object_relationship', 'isConstituentOf');
-  $objects = array();
 
-  $connection = islandora_get_tuque_connection();
-  $escaped_pid = str_replace(':', '_', $pid);
-  if ($connection) {
-    $query = <<<EOQ
-PREFIX islandora-rels-ext: <http://islandora.ca/ontology/relsext#>
-SELECT ?object ?title ?seq
-FROM <#ri>
-WHERE {
-  ?object <fedora-model:label> ?title ;
-          <fedora-rels-ext:$rels_predicate> <info:fedora/$pid> .
-  OPTIONAL {
-    ?object islandora-rels-ext:isSequenceNumberOf$escaped_pid ?seq
+  $backend = variable_get('islandora_compound_object_query_backend', ISLANDORA_COMPOUND_OBJECT_LEGACY_BACKEND);
+  $backends = module_invoke_all('islandora_compound_object_query_backends');
+
+  if (!isset($backends[$backend])) {
+    $backend = ISLANDORA_COMPOUND_OBJECT_LEGACY_BACKEND;
   }
-}
-EOQ;
-    $results = $connection->repository->ri->sparqlQuery($query);
 
-    // Sort the objects into their proper order.
-    $sort = function($a, $b) {
-      $a = $a['seq']['value'];
-      $b = $b['seq']['value'];
-      if ($a === $b) {
-        return 0;
-      }
-      if (empty($a)) {
-        return 1;
-      }
-      if (empty($b)) {
-        return -1;
-      }
-      return $a - $b;
-    };
-    uasort($results, $sort);
+  if (isset($backends[$backend]['file'])) {
+    require_once $backends[$backend]['file'];
+  }
 
+  $results = call_user_func($backends[$backend]['callable'], $pid);
+
+  if ($ret_title) {
+    $objects = $results;
+  }
+  else {
+    $objects = array();
     foreach ($results as $result) {
-      $object = islandora_object_load($result['object']['value']);
-      if (islandora_object_access(ISLANDORA_VIEW_OBJECTS, $object)) {
-        if ($ret_title) {
-          $objects[$result['object']['value']] = array(
-            'pid' => $result['object']['value'],
-            'title' => $result['title']['value'],
-            'seq' => $result['seq']['value'],
-          );
-        }
-        else {
-          $objects[] = $result['object']['value'];
-        }
-      }
+      $objects[] = $result['pid'];
     }
   }
 
@@ -482,9 +525,9 @@ EOQ;
  */
 function islandora_compound_object_task_access(AbstractObject $object) {
   $rels_predicate = variable_get('islandora_compound_object_relationship', 'isConstituentOf');
-  $part_of = $object->relationships->get('info:fedora/fedora-system:def/relations-external#', $rels_predicate);
+  $part_of = $object->relationships->get(FEDORA_RELS_EXT_URI, $rels_predicate);
   if (variable_get('islandora_compound_object_use_jail_view', FALSE) && islandora_object_access(ISLANDORA_VIEW_OBJECTS, $object) &&
-    ((in_array('islandora:compoundCModel', $object->models) && islandora_compound_object_children_exist($object)) || !empty($part_of))) {
+    ((in_array(ISLANDORA_COMPOUND_OBJECT_CMODEL, $object->models) && islandora_compound_object_children_exist($object)) || !empty($part_of))) {
     return TRUE;
   }
   else {
@@ -522,18 +565,23 @@ function islandora_compound_object_menu_local_tasks_alter(&$data, $router_item, 
   if (variable_get('islandora_compound_object_use_jail_view', FALSE)) {
     $valid_paths = module_invoke_all('islandora_compound_object_management_control_paths');
     if (strpos($root_path, 'islandora/object/%') === 0) {
-      $object = menu_get_object('islandora_object', 2);
-      $children = islandora_compound_object_get_parts($object->id);
-      $pid = (!empty($children)) ? $children[0] : $object->id;
-      $compound_object = islandora_object_load($pid);
-      $compound_info = islandora_compound_object_retrieve_compound_info($compound_object);
+      $compound_object = menu_get_object('islandora_object', 2);
+      $compound_info = islandora_compound_object_retrieve_compound_info($compound_object, TRUE);
       if ($compound_info) {
-        drupal_set_title(filter_xss(t('!parent - !child', array(
-          '!parent' => $compound_info['parent_label'],
-          '!child' => $compound_info['label'],
-        ))));
+        if ($compound_object->id == $compound_info['parent_pid']) {
+          // We are the parent so don't repeat the label twice.
+          drupal_set_title($compound_info['parent_label']);
+        }
+        else {
+          // Display both the parent and child label.
+          drupal_set_title(t('@parent - @child', array(
+            '@parent' => $compound_info['parent_label'],
+            '@child' => $compound_info['label'],
+          )), PASS_THROUGH);
+        }
       }
       if (isset($data['tabs'][0]['output'])) {
+        $query_params = drupal_get_query_parameters();
         foreach ($data['tabs'][0]['output'] as $key => &$tab) {
           if ($tab['#link']['path'] == 'islandora/object/%/compound_count') {
             if (in_array($root_path, $valid_paths) && !empty($compound_info)) {
@@ -561,6 +609,7 @@ function islandora_compound_object_menu_local_tasks_alter(&$data, $router_item, 
                   'id' => 'islandora-compound-previous-link',
                 ),
                 'html' => FALSE,
+                'query' => $query_params,
               );
             }
             else {
@@ -577,6 +626,7 @@ function islandora_compound_object_menu_local_tasks_alter(&$data, $router_item, 
                   'id' => 'islandora-compound-next-link',
                 ),
                 'html' => FALSE,
+                'query' => $query_params,
               );
             }
             else {
@@ -594,9 +644,13 @@ function islandora_compound_object_menu_local_tasks_alter(&$data, $router_item, 
  *
  * @param AbstractObject $object
  *   An AbstractObject representing an object within Fedora.
+ * @param bool $allow_parent
+ *   (Optional) If this is set to true, then this function will return
+ *   information about the compound if the passed in object is either
+ *   a parent or a child, otherwise it will return an empty array.
  *
  * @return array
- *   An array describing the compound containining:
+ *   An array describing the compound containing:
  *   -parent_label: A string holding the parent label of the compound.
  *   -parent_pid: A string holding the pid of the root compound.
  *   -parent_url: A string containing the URL to the manage link for the root
@@ -605,49 +659,70 @@ function islandora_compound_object_menu_local_tasks_alter(&$data, $router_item, 
  *   an empty string if one does not exist.
  *   -next_pid: A string with the pid of the next pid in the sequence, an empty
  *   string if one does not exist.
+ *   -current_pid: Either the PID of the object passed in, or the first child
+ *   if the object passed in is the parent.
  *   -child_count: An integer of the number of children the object has.
  *   -siblings: An array containing the siblings of the compound.
+ *   -siblings_detailed: An array containing the details of sibling objects.
  *   -pid: A string that is the pid of the current object we are on.
  *   -label: A string containing the label of the object.
  *   -sequence: An integer that is the sequence number of the current object.
+ *   Or an empty array is the object is the parent of a compound and
+ *   $allow_parent is false.
  */
-function islandora_compound_object_retrieve_compound_info(AbstractObject $object) {
+function islandora_compound_object_retrieve_compound_info(AbstractObject $object, $allow_parent = FALSE) {
   $rels_predicate = variable_get('islandora_compound_object_relationship', 'isConstituentOf');
-  $part_of = $object->relationships->get('info:fedora/fedora-system:def/relations-external#', $rels_predicate);
+  $part_of = $object->relationships->get(FEDORA_RELS_EXT_URI, $rels_predicate);
   $info = array();
-  // This object is part of a compound object.
+
+  // This object is the child of a compound object.
   if (!empty($part_of)) {
-    // Go through all parents.
-    foreach ($part_of as $part) {
-      $parent_pid = $part['object']['value'];
-      $parent = islandora_object_load($parent_pid);
-
-      $siblings = islandora_compound_object_get_parts($parent_pid);
-      $current_key = array_search($object->id, $siblings);
-      $previous_pid = (isset($siblings[$current_key - 1])) ? $siblings[$current_key - 1] : '';
-      $next_pid = (isset($siblings[$current_key + 1])) ? $siblings[$current_key + 1] : '';
-
-      // Check if perms to show link for parent manage.
-      if (islandora_object_manage_access_callback(array(
-        ISLANDORA_METADATA_EDIT, ISLANDORA_MANAGE_PROPERTIES, ISLANDORA_ADD_DS), $parent)) {
-        $parent_url = 'islandora/object/' . $parent_pid . '/manage';
-      }
-      else {
-        $parent_url = FALSE;
-      }
-      $info = array(
-        'parent_label' => $parent->label,
-        'parent_pid' => $parent_pid,
-        'parent_url' => $parent_url,
-        'previous_pid' => $previous_pid,
-        'next_pid' => $next_pid,
-        'child_count' => count($siblings),
-        'siblings' => $siblings,
-        'pid' => $object->id,
-        'label' => $object->label,
-        'sequence' => $current_key + 1,
-      );
+    // XXX: Handle the case where we are a member of multiple compounds?
+    // For now just grab the last value in the array.
+    $part = array_pop($part_of);
+    $parent_pid = $part['object']['value'];
+    $parent = islandora_object_load($parent_pid);
+  }
+  // Assume this object is the parent compound object.
+  else {
+    if (!$allow_parent) {
+      return array();
     }
+
+    $parent_pid = $object->id;
+    $parent = $object;
+  }
+
+  $siblings_detailed = islandora_compound_object_get_parts($parent_pid, TRUE);
+  if (!empty($siblings_detailed)) {
+    $siblings = array_keys($siblings_detailed);
+    $current_key = ($parent === $object) ? 0 : array_search($object->id, $siblings);
+    $previous_pid = (isset($siblings[$current_key - 1])) ? $siblings[$current_key - 1] : '';
+    $next_pid = (isset($siblings[$current_key + 1])) ? $siblings[$current_key + 1] : '';
+
+    // Check if perms to show link for parent manage.
+    if (islandora_object_manage_access_callback(array(
+      ISLANDORA_METADATA_EDIT, ISLANDORA_MANAGE_PROPERTIES, ISLANDORA_ADD_DS), $parent)) {
+      $parent_url = 'islandora/object/' . $parent_pid . '/manage';
+    }
+    else {
+      $parent_url = FALSE;
+    }
+
+    $info = array(
+      'parent_label' => $parent->label,
+      'parent_pid' => $parent_pid,
+      'parent_url' => $parent_url,
+      'previous_pid' => $previous_pid,
+      'next_pid' => $next_pid,
+      'current_pid' => $siblings[$current_key],
+      'child_count' => count($siblings),
+      'siblings' => $siblings,
+      'siblings_detailed' => $siblings_detailed,
+      'pid' => $object->id,
+      'label' => $object->label,
+      'sequence' => $current_key + 1,
+    );
   }
   return $info;
 }
@@ -659,5 +734,36 @@ function islandora_compound_object_islandora_compound_object_management_control_
   return array(
     'islandora/object/%',
     'islandora/object/%/view',
+  );
+}
+
+/**
+ * Implements hook_islandora_get_breadcrumb_query_predicates().
+ */
+function islandora_compound_object_islandora_get_breadcrumb_query_predicates(AbstractObject $object) {
+  if (variable_get('islandora_compound_object_show_compound_parents_in_breadcrumbs', FALSE)) {
+    return array(
+      format_string('fedora-rels-ext:!compound_rels', array('!compound_rels' => variable_get('islandora_compound_object_relationship', 'isConstituentOf'))),
+    );
+  }
+}
+
+/**
+ * Implements hook_islandora_compound_object_query_backends().
+ */
+function islandora_compound_object_islandora_compound_object_query_backends() {
+  $module_path = drupal_get_path('module', 'islandora_compound_object');
+
+  return array(
+    ISLANDORA_COMPOUND_OBJECT_LEGACY_BACKEND => array(
+      'title' => t('(Default) Legacy SPARQL - Does a SPARQL query followed by an access check.'),
+      'callable' => 'islandora_compound_object_legacy_query_sparql',
+      'file' => "$module_path/includes/backends.inc",
+    ),
+    'islandora_basic_collection_sparql_query_backend' => array(
+      'title' => t('SPARQL - Does a SPARQL query with filters. Generally faster than the default option.'),
+      'callable' => 'islandora_compound_object_query_sparql',
+      'file' => "$module_path/includes/backends.inc",
+    ),
   );
 }
