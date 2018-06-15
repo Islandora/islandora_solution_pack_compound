@@ -4,4 +4,4 @@ dependencies[] = islandora
 package = Islandora Solution Packs
 configure = admin/islandora/solution_pack_config/compound_object
 core = 7.x
-version = 7.x-1.11RC1
+version = 7.x-1.11
