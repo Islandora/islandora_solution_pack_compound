@@ -178,7 +178,7 @@ function islandora_compound_object_form_islandora_delete_object_form_alter(array
 }
 
 /**
- * Delete all the child objects related to the compound object object being deleted.
+ * Delete all the child objects related to the compound object being deleted.
  *
  * @param array $form
  *   The Drupal form.
@@ -793,4 +793,3 @@ function islandora_compound_object_islandora_compound_object_query_backends() {
     ),
   );
 }
-

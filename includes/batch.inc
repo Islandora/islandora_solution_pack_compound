@@ -1,4 +1,8 @@
 <?php
+/**
+ * @file
+ * Batch functionality for the compound solution pack.
+ */
 
 /**
  * Creates batch object for deleting the children of a compound.
@@ -7,6 +11,7 @@
  *   The compound we are deleting from.
  * @param array $children
  *   An array of children to delete.
+ *
  * @return array
  *   The batch array to be passed to batch_set.
  */
@@ -45,6 +50,7 @@ function islandora_compound_object_delete_children_batch(AbstractObject $compoun
  *   The children of the compound being deleted.
  * @param array $context
  *   The batch context.
+ *
  * @return mixed
  *   The child being processed in this invocation.
  */
@@ -52,19 +58,25 @@ function islandora_compound_object_start_operation(AbstractObject $compound, arr
   if (!isset($context['sandbox']['progress'])) {
     $context['sandbox']['progress'] = 0;
     $context['sandbox']['total'] = count($children);
-    $context['results'] = array('deleted' => 0, 'removed' => 0, 'parent' => $compound->label);
+    $context['results'] = array(
+      'deleted' => 0,
+      'removed' => 0,
+      'parent' => $compound->label
+    );
   }
   return $children[$context['sandbox']['progress']];
 }
 
 /**
- * Check if an object has other parents. Assumes that the parents relationship belongs to
- * FEDORA_RELS_EXT_URI namespace.
+ * Check if an object has other parents.
+ *
+ * Assumes that the parents relationship belongs to FEDORA_RELS_EXT_URI namespace.
  *
  * @param AbstractObject $child
  *   The child object.
  * @param AbstractObject $compound
  *   The parent compound.
+ *
  * @return bool
  *   TRUE if the child has other parents, FALSE otherwise.
  */
@@ -143,11 +155,11 @@ function islandora_compound_object_delete_children_batch_operation(AbstractObjec
 /**
  * Called when the batch is finished. Sets a success/fail message.
  *
- * @param $success
+ * @param bool $success
  *   Success of the batch.
- * @param $results
+ * @param array $results
  *   Results from the batch context.
- * @param $operations
+ * @param array $operations
  *   Operations in the batch.
  */
 function islandora_compound_object_batch_finished($success, $results, $operations) {
