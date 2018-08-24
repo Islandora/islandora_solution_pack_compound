@@ -157,17 +157,43 @@ function islandora_compound_object_block_view($delta = '') {
 }
 
 /**
- * Implements hook_CMODEL_PID_islandora_object_purged().
+ * Implements hook_form_FORM_ID_alter().
  */
-function islandora_compound_object_islandora_compoundcmodel_islandora_object_purged($pid) {
-  $parts = islandora_compound_object_get_parts($pid);
-  $rels_predicate = variable_get('islandora_compound_object_relationship', 'isConstituentOf');
-  foreach ($parts as $part) {
-    $escaped_pid = str_replace(':', '_', $pid);
-    $child_object = islandora_object_load($part);
-    $child_object->relationships->remove(FEDORA_RELS_EXT_URI, $rels_predicate, $pid);
-    $child_object->relationships->remove(ISLANDORA_RELS_EXT_URI, "isSequenceNumberOf$escaped_pid");
+function islandora_compound_object_form_islandora_object_properties_form_alter(array &$form, array &$form_state) {
+  $object = $form_state['object'];
+  if (in_array(ISLANDORA_COMPOUND_OBJECT_CMODEL, $object->models)) {
+    $form['delete']['#value'] = t('Delete Compound Object');
   }
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function islandora_compound_object_form_islandora_delete_object_form_alter(array &$form, array &$form_state) {
+  $object = $form_state['object'];
+  if (in_array(ISLANDORA_COMPOUND_OBJECT_CMODEL, $object->models)) {
+    $form['description']['#markup'] = t('This will remove the compound object and all its child objects. Child objects currently shared with collections or part of other compound objects will not be deleted. This action cannot be undone.');
+    $form['#submit'] = array('islandora_compound_object_islandora_delete_object_form_delete_children_submit');
+  }
+}
+
+/**
+ * Delete all the child objects related to the compound object object being deleted.
+ *
+ * @param array $form
+ *   The Drupal form.
+ * @param array $form_state
+ *   The Drupal form state.
+ */
+function islandora_compound_object_islandora_delete_object_form_delete_children_submit(array $form, array &$form_state) {
+  module_load_include('inc', 'islandora_compound_object', 'includes/batch');
+  $object = $form_state['object'];
+  batch_set(islandora_compound_object_delete_children_batch($object, islandora_compound_object_get_parts($object->id)));
+  // Called from within this submit handler rather than from the Drupal Form API
+  // as we need the object to exist to generate the pages and if we run this
+  // batch operation from a submit handler any submit handlers to be called
+  // afterwards will not get called, which is a bug/feature of the Form API.
+  islandora_delete_object_form_submit($form, $form_state);
 }
 
 /**
@@ -767,3 +793,4 @@ function islandora_compound_object_islandora_compound_object_query_backends() {
     ),
   );
 }
+
