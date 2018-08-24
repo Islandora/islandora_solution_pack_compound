@@ -61,7 +61,7 @@ function islandora_compound_object_start_operation(AbstractObject $compound, arr
     $context['results'] = array(
       'deleted' => 0,
       'removed' => 0,
-      'parent' => $compound->label
+      'parent' => $compound->label,
     );
   }
   return $children[$context['sandbox']['progress']];
@@ -70,7 +70,7 @@ function islandora_compound_object_start_operation(AbstractObject $compound, arr
 /**
  * Check if an object has other parents.
  *
- * Assumes that the parents relationship belongs to FEDORA_RELS_EXT_URI namespace.
+ * Assumes that parents relationship belongs to FEDORA_RELS_EXT_URI namespace.
  *
  * @param AbstractObject $child
  *   The child object.
@@ -126,7 +126,8 @@ function islandora_compound_object_end_operation(array &$context) {
 /**
  * The batch operation to remove the children.
  *
- * Removes their relationships to the parent if they have other parents, and deletes them otherwise.
+ * Removes their relationships to the parent if they have other parents, and
+ * deletes them otherwise.
  *
  * @param AbstractObject $compound
  *   The parent compound.
