@@ -70,7 +70,8 @@ function islandora_compound_object_start_operation(AbstractObject $compound, arr
 /**
  * Check if an object has other parents.
  *
- * Assumes that parents relationship belongs to FEDORA_RELS_EXT_URI namespace.
+ * Will return true if object has any relationship to anther object other then
+ * its content model object.
  *
  * @param AbstractObject $child
  *   The child object.
@@ -81,9 +82,14 @@ function islandora_compound_object_start_operation(AbstractObject $compound, arr
  *   TRUE if the child has other parents, FALSE otherwise.
  */
 function islandora_compound_object_has_other_parents(AbstractObject $child, AbstractObject $compound) {
-  $relationships = $child->relationships->get(FEDORA_RELS_EXT_URI);
+  $relationships = $child->relationships->get();
   foreach ($relationships as $relationship) {
-    if ($relationship['object']['literal'] == FALSE && $relationship['object']['value'] != $compound->id) {
+    $is_cmodel_relationship = $relationship['predicate']['namespace'] == FEDORA_MODEL_URI
+      && $relationship['predicate']['value'] == 'hasModel';
+    if (!$is_cmodel_relationship
+      && $relationship['object']['literal'] == FALSE
+      && $relationship['object']['value'] != $compound->id
+    ) {
       return TRUE;
     }
   }
