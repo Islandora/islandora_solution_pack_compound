@@ -769,7 +769,7 @@ function islandora_compound_object_islandora_compound_object_query_backends() {
 }
 
 /**
- * Implements hook_islandora_solution_pack_child_relationships
+ * Implements hook_islandora_solution_pack_child_relationships().
  */
 function islandora_compound_object_islandora_solution_pack_child_relationships() {
   $predicate = variable_get('islandora_compound_object_relationship', 'isConstituentOf');
