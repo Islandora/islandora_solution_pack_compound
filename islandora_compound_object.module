@@ -801,6 +801,11 @@ function islandora_compound_object_islandora_compound_object_query_backends() {
       'callable' => 'islandora_compound_object_query_sparql',
       'file' => "$module_path/includes/backends.inc",
     ),
+    'islandora_basic_collection_sparql_query_backend_compliant' => array(
+      'title' => t('SPARQL - Use this option for fully compliant SPARQL triple stores. Does not work with Mulgara.'),
+      'callable' => 'islandora_compound_object_query_sparql_compliant',
+      'file' => "$module_path/includes/backends.inc",
+    ),
   );
 }
 

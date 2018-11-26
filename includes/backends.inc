@@ -65,6 +65,20 @@ EOQ;
  * Implements callback_islandora_compound_object_query_backends().
  */
 function islandora_compound_object_query_sparql($pid) {
+  return islandora_compound_object_query_sparql_general($pid, FALSE);
+}
+
+/**
+ * Implements callback_islandora_compound_object_query_backends().
+ */
+function islandora_compound_object_query_sparql_compliant($pid) {
+  return islandora_compound_object_query_sparql_general($pid, TRUE);
+}
+
+/**
+ * General callback function for SPARQL query functions above.
+ */
+function islandora_compound_object_query_sparql_general($pid, $cast_int = FALSE) {
   module_load_include('inc', 'islandora', 'includes/utilities');
 
   $rels_predicate = variable_get('islandora_compound_object_relationship', 'isConstituentOf');
@@ -95,6 +109,20 @@ function islandora_compound_object_query_sparql($pid) {
   }
 
   $escaped_pid = str_replace(':', '_', $pid);
+
+  // XXX: The default Mulgara triple store sorts the sequence number as an
+  // integer, even though it doesn't have the integer type. Other SPARQL
+  // compliant triple stores (specifically blazegraph) may do a string sort
+  // on this, leading to the results being sorted strangely. Mulgara doesn't
+  // support casting datatypes, but any SPARQL compatible store should. This
+  // lets compatible stores return the results in the int sort order.
+  if ($cast_int) {
+    $sort = 'ORDER BY ASC(xsd:integer(?seq))';
+  }
+  else {
+    $sort = 'ORDER BY ASC(?seq)';
+  }
+
   $query = <<<EOQ
 PREFIX islandora-rels-ext: <http://islandora.ca/ontology/relsext#>
 SELECT DISTINCT ?object ?title ?seq
@@ -113,7 +141,7 @@ WHERE {
   FILTER((!bound(?role) && !bound(?user)) || (bound(?user) && ?user='{$user_name}') || (bound(?role) && ($role_matcher)))
   $namespace_filter
 }
-ORDER BY ASC(?seq)
+$sort
 EOQ;
 
   $connection = islandora_get_tuque_connection();
