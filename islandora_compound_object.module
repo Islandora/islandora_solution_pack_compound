@@ -720,7 +720,7 @@ function islandora_compound_object_retrieve_compound_info(AbstractObject $object
     $part = array_pop($part_of);
     $parent_pid = $part['object']['value'];
     if (!$parent = islandora_object_load($parent_pid)) {
-      $parent = NULL;
+      return array();
     }
   }
   // Assume this object is the parent compound object.
