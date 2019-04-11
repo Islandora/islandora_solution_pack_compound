@@ -719,9 +719,7 @@ function islandora_compound_object_retrieve_compound_info(AbstractObject $object
     // For now just grab the last value in the array.
     $part = array_pop($part_of);
     $parent_pid = $part['object']['value'];
-    if (!$parent = islandora_object_load($parent_pid)) {
-      return array();
-    }
+    $parent = islandora_object_load($parent_pid);
   }
   // Assume this object is the parent compound object.
   else {
@@ -741,12 +739,13 @@ function islandora_compound_object_retrieve_compound_info(AbstractObject $object
     $next_pid = (isset($siblings[$current_key + 1])) ? $siblings[$current_key + 1] : '';
 
     // Check if perms to show link for parent manage.
-    if (islandora_object_manage_access_callback(array(
+    if ($parent && islandora_object_manage_access_callback(array(
       ISLANDORA_METADATA_EDIT, ISLANDORA_MANAGE_PROPERTIES, ISLANDORA_ADD_DS), $parent)) {
       $parent_url = 'islandora/object/' . $parent_pid . '/manage';
     }
     else {
       $parent_url = FALSE;
+      $parent = (object) array('label' => NULL);
     }
 
     $info = array(
