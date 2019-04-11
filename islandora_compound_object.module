@@ -719,7 +719,9 @@ function islandora_compound_object_retrieve_compound_info(AbstractObject $object
     // For now just grab the last value in the array.
     $part = array_pop($part_of);
     $parent_pid = $part['object']['value'];
-    $parent = islandora_object_load($parent_pid);
+    if (!$parent = islandora_object_load($parent_pid)) {
+      $parent = NULL;
+    }
   }
   // Assume this object is the parent compound object.
   else {
