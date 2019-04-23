@@ -745,11 +745,10 @@ function islandora_compound_object_retrieve_compound_info(AbstractObject $object
     }
     else {
       $parent_url = FALSE;
-      $parent = (object) array('label' => NULL);
     }
 
     $info = array(
-      'parent_label' => $parent->label,
+      'parent_label' => ($parent && $parent->label) ? $parent->label : NULL,
       'parent_pid' => $parent_pid,
       'parent_url' => $parent_url,
       'previous_pid' => $previous_pid,
